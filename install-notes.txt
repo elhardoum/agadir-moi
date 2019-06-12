@@ -1,0 +1,16 @@
+0. Setup env variables
+
+- mv .env.sample && $EDITOR .env
+
+1. Auth tokens signing keys
+
+- regenerate auth sign keys with ssh-keygen
+- convert public auth key to pem format ssh-keygen -f id_auth.pub -e -m pem > id_auth.pem.pub
+
+2. setup db
+
+- ssh as postgres (su), createuser agadirmoi, createdb agadirmoi
+- psql -U postgres
+- `grant all privileges on database agadirmoi to agadirmoi`
+- `alter user agadirmoi with encrypted password 'agadirmoi'`
+- exec admin/db.sql

@@ -1,0 +1,22 @@
+{
+  "name": "agadir-moi-admin",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "start-dev": "nodemon -x 'node server.js' -e js,json -i 'www/*' -q"
+  },
+  "author": "elhardoum",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookies": "^0.7.3",
+    "finalhandler": "^1.1.1",
+    "jsonwebtoken": "^8.5.1",
+    "nodemailer": "^6.1.1",
+    "pg": "^7.10.0",
+    "serve-static": "^1.13.2"
+  }
+}
