@@ -104,6 +104,7 @@ module.exports = {
     if ( user ) {
       delete user.password
       delete user.reset_token
+      delete user.auth_key
 
       user.gravatar = `https://www.gravatar.com/avatar/${require('crypto').createHash('md5').update(user.email).digest('hex')}?d=mp`
 
@@ -192,7 +193,7 @@ module.exports = {
     let payload
 
     try {
-      payload = require('jsonwebtoken').verify(auth_cookie, require('fs').readFileSync('./sign-keys/auth_rsa.pub', 'utf8'), {
+      payload = require('jsonwebtoken').verify(auth_cookie, require('fs').readFileSync(`${APP_CONFIG.ROOT_DIR}/src/pem/auth_rsa.pub`, 'utf8'), {
         algorithm: 'RS256'
       })
     } catch (e) {/*pass*/}
@@ -200,7 +201,7 @@ module.exports = {
     if ( ! payload || 'object' !== typeof payload || ! payload.key )
       return
 
-    let user = await this.getUserBy( 'auth_key', payload.id )
+    let user = await this.getUserBy( 'auth_key', payload.key )
 
     return user && user.id ? user : null
   },
@@ -216,7 +217,7 @@ module.exports = {
 
     if ( ! email ) {
       errors.push({field: 'login', error: 'Please enter an email address.'})
-    } else if ( ! /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(email) ) {
+    } else if ( ! APP_UTIL.is_email(email) ) {
       errors.push({field: 'login', error: 'Please enter a valid email address.'})
     }
 
@@ -247,7 +248,7 @@ module.exports = {
 
       if ( user.auth_key ) {
         try {
-          jwt_token = require('jsonwebtoken').sign({key: user.auth_key}, require('fs').readFileSync('./sign-keys/auth_rsa', 'utf8'), {
+          jwt_token = require('jsonwebtoken').sign({key: user.auth_key}, require('fs').readFileSync(`${APP_CONFIG.ROOT_DIR}/src/pem/auth_rsa`, 'utf8'), {
             expiresIn: remember ? '15d' : '1d',
             algorithm: 'RS256'
           })
@@ -255,7 +256,7 @@ module.exports = {
       }
 
       if ( jwt_token ) {
-        APP_UTIL.setCookie( req, res, 'auth', jwt_token, { signed: true, expires_seconds: remember ? (+new Date + 15 *86400) : null } )
+        APP_UTIL.setCookie( req, res, 'auth', jwt_token, { signed: true, expires_seconds: remember ? 15 *86400 : null } )
         return res.sendJSON({ success: true })
       }
 
@@ -433,7 +434,7 @@ module.exports = {
 
     if ( 'email' in update && ! email ) {
       errors.push({field: 'email', error: 'Please enter an email address.'})
-    } else if ( 'email' in update && ! /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(email) ) {
+    } else if ( 'email' in update && ! APP_UTIL.is_email(email) ) {
       errors.push({field: 'email', error: 'Please enter a valid email address.'})
     }
 

@@ -61,14 +61,14 @@ const http = require('http'), server = http.createServer(async (req, res) =>
     }
 
     return require('serve-static')
-      ('./www/public', {'index': ['index.html', 'index.htm']})(req, res, require('finalhandler')(req, res))
+      ('./src/web/public', {'index': ['index.html', 'index.htm']})(req, res, require('finalhandler')(req, res))
   }
 })
 
 server.listen(process.env.PORT||9090, process.env.HOST||'0.0.0.0', _ =>
   console.log(`Server running at http://${process.env.HOST||'0.0.0.0'}:${process.env.PORT||9090}/`))
 
-require('./src/api/users').cliMaybeRegisterFirstSuperAdmin(_ =>
+process.env.SKIP_AUTO_CREATE_SUPER_ADMIN || require('./src/api/users').cliMaybeRegisterFirstSuperAdmin(_ =>
 {
   global.APP_CONFIG = global.APP_CONFIG || require('./src/api/config')
   global.APP_UTIL = global.APP_UTIL || require('./src/api/util')

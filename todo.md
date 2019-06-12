@@ -8,6 +8,8 @@
 - [ ] moderators can approve/dismiss complaints
 - [ ] admins can manage publications and complaints
 - [ ] super admin has caps of normal admins, plus managing all user roles
+- [ ] notifications preference for mods
+- [ ] Safari auth issue
 
 <!-- and more to come -->
 
@@ -15,5 +17,6 @@
 
 - [ ] `Infinity` of features
 - [ ] firebase data store and sync (advertises real time syncing for connected devices)
+- [ ] push notifications or sms for opted collectors
 
 <!-- and more to come (send help) -->
