@@ -1,0 +1,24 @@
+version: '3'
+services:
+  webadmin:
+    image: node:12.0.0-alpine
+    volumes:
+      - ./admin:/app
+    working_dir: /app
+    depends_on:
+      - postgres
+    ports:
+      - 9090:9090
+    command: sh -c '[ -d node_modules ] || npm install; npm run start-dev'
+
+  # web-app
+  postgres:
+    image: postgres:11.2-alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
