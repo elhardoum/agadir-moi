@@ -1,16 +1,18 @@
 ## Backend - administration UI
 
-- [ ] Docker dev structure
-- [ ] Auth via JWT or cookie/crypt based login
-- [ ] postgres for admin relational db needs
-- [ ] user roles: super admin, admin, moderator
+- [x] Docker dev structure
+- [x] Auth via JWT or cookie/crypt based login
+- [x] postgres for admin relational db needs
+- [x] user roles: super admin, admin, moderator
 - [ ] manage publications, post attachments to firebase
 - [ ] moderators can approve/dismiss complaints
 - [ ] admins can manage publications and complaints
 - [ ] super admin has caps of normal admins, plus managing all user roles
 - [ ] notifications preference for mods
 - [ ] Safari auth issue
-- [ ] news/events/Pratique(phone #s) management
+- [ ] news CRUD
+- [ ] news CRUD
+- [x] important phone numbers CRUD
 
 <!-- and more to come -->
 

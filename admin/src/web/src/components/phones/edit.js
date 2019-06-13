@@ -3,8 +3,9 @@ import { title } from './../../helpers'
 import Autocomplete from 'react-autocomplete'
 import { Link } from 'react-router-dom'
 import 'abortcontroller-polyfill/dist/polyfill-patch-fetch'
+import Loading from './../misc/Loading'
 
-export default class ImportantPhoneNumbersNew extends Component
+export default class ImportantPhoneNumbersEdit extends Component
 {
   constructor(props)
   {
@@ -22,14 +23,25 @@ export default class ImportantPhoneNumbersNew extends Component
 
   componentDidMount()
   {
-    title('Add New Number')
+    title('Edit Number')
 
     const list = this.props.getGlobalState('phones/raw-list')
+        , selectItem = list =>
+        {
+          const item = (this.props.getGlobalState('phones/raw-list')||[]).find(x => x.t == this.props.match.params.id)
+          item && item.t ? this.setState({
+            category: item.category, phone: item.number, group: item.group, id: item.t, valid: true
+          }) : this.setState({
+            valid: false
+          })
+        }
 
     list || fetch('/api/important-phone-numbers')
       .then(res => res.json())
-      .then(list => Array.isArray(list) && this.props.setGlobalState({'phones/raw-list': list}))
+      .then(list => Array.isArray(list) && (this.props.setGlobalState({'phones/raw-list': list}), selectItem(list)))
       .catch(e => 1)
+
+    list && Array.isArray(list) && selectItem(list)
   }
 
   async onSubmit(e)
@@ -38,7 +50,7 @@ export default class ImportantPhoneNumbersNew extends Component
 
     document.activeElement && document.activeElement.blur()
 
-    const { category='', phone='', group='', errors } = this.state
+    const { category='', phone='', group='', errors, id } = this.state
     errors.category = []
     errors.phone = []
     errors.general = []
@@ -65,8 +77,8 @@ export default class ImportantPhoneNumbersNew extends Component
       this.setState({loading: true})
 
       let res = await fetch('/api/important-phone-numbers', {
-        method: 'PUT',
-        body: `category=${encodeURIComponent(category.trim())}&phone=${encodeURIComponent(phone.trim())}&group=${encodeURIComponent(group.trim())}`,
+        method: 'PATCH',
+        body: `id=${+id}&category=${encodeURIComponent(category.trim())}&phone=${encodeURIComponent(phone.trim())}&group=${encodeURIComponent(group.trim())}`,
         headers: { 'Content-type': 'application/x-www-form-urlencoded' },
         signal: this.ABORT_CONTROLLER.signal
       }).then(res => res.json())
@@ -94,6 +106,20 @@ export default class ImportantPhoneNumbersNew extends Component
     {
       categories.indexOf(item.category) < 0 && categories.push(item.category)
     })
+
+    if ( 'boolean' !== typeof this.state.valid ) {
+      return (
+        <div className="bg-white px-2 mt-3 p-6 shadow w-full"><div className="flex h-48 items-center text-center w-full">
+          <Loading {...this.props} className="w-full" />
+        </div></div>
+      )
+    } else if ( ! this.state.valid ) {
+      return (
+        <div className="select-none bg-white px-2 mt-3 p-6 shadow w-full"><div className="flex h-48 items-center w-full">
+          <div className="table m-auto text-sm text-grey">This number does not exist or is deleted.</div>
+        </div></div>
+      )
+    }
 
     return (
       <div className="h-full">

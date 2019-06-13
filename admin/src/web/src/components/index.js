@@ -12,6 +12,7 @@ import Error404 from './misc/Error404'
 import Home from './misc/Home'
 import ImportantPhoneNumbers from './phones/'
 import ImportantPhoneNumbersNew from './phones/new'
+import ImportantPhoneNumbersEdit from './phones/edit'
 
 import './../style.scss'
 
@@ -363,6 +364,8 @@ export default class Wrap extends Component
             && <Route exact path='/important-phone-numbers' render={routerProps => renderProxy(<ImportantPhoneNumbers {...routerProps} {...props} />, routerProps)} />}
           {user && (user.granted_roles||[]).join('').indexOf('super-admin') >= 0
             && <Route exact path='/important-phone-numbers/new' render={routerProps => renderProxy(<ImportantPhoneNumbersNew {...routerProps} {...props} />, routerProps)} />}
+          {user && (user.granted_roles||[]).join('').indexOf('super-admin') >= 0
+            && <Route exact path='/important-phone-numbers/edit/:id' render={routerProps => renderProxy(<ImportantPhoneNumbersEdit {...routerProps} {...props} />, routerProps)} />}
 
           <Route render={routerProps => renderProxy(<Error404 {...routerProps} {...props} />, routerProps)} />
         </Switch>

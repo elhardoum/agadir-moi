@@ -53,6 +53,7 @@ const http = require('http'), server = http.createServer(async (req, res) =>
       case 'POST important-phone-numbers':
       case 'GET important-phone-numbers':
       case 'DELETE important-phone-numbers':
+      case 'PATCH important-phone-numbers':
         return require('./src/api/phones').http( request_name, req, res, default_callback )
 
       default:

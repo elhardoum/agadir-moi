@@ -12,3 +12,9 @@ export const title = ( title ) =>
 
 export const is_email = email =>
   /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(email)
+
+export const getQueryArgFromSearch = (search, name) =>
+{
+  let arg = [... new URLSearchParams(search)].find(x => x[0] === name)
+  return arg && arg.pop ? arg.pop() : undefined
+}

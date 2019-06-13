@@ -8,6 +8,9 @@ module.exports = {
         case 'POST important-phone-numbers':
           return this.httpPut( req, res )
 
+        case 'PATCH important-phone-numbers':
+          return this.httpUpdate( req, res )
+
         case 'GET important-phone-numbers':
           return this.httpGet( req, res )
 
@@ -72,6 +75,56 @@ module.exports = {
     })
   },
 
+  async httpUpdate( req, res )
+  {
+    let { category, phone, group, id } = req.parsedQuery
+
+    let errors = []
+
+    if ( ! id || ! /^\d+$/.test(id) ) {
+      errors.push({field: 'general', error: 'Could not find a record for this number.'})
+    }
+
+    if ( ! category || ! category.trim() ) {
+      errors.push({field: 'category', error: 'Please enter a category name for this number.'})
+    }
+
+    if ( ! phone || ! phone.trim() ) {
+      errors.push({field: 'phone', error: 'Please enter a phone number.'})
+    }
+
+    if ( ! group || ! group.trim() ) {
+      errors.push({field: 'group', error: 'Please enter a group value.'})
+    }
+
+    if ( Object.keys(errors).length ) {
+      return res.sendJSON({ success: false, errors })
+    }
+
+    let list = ((await APP_UTIL.fireStoreSimple.get('kv/important-phone-numbers'))||{}).list || []
+      , item = list.find(x => x.t == id)
+
+    if ( ! item || ! item.t ) {
+      errors.push({field: 'general', error: 'Could not find a record for this number.'})
+      return res.sendJSON({ success: false, errors })
+    }
+
+    let updated = true
+
+    if ( item.category !== category || item.number !== phone || item.group !== group ) {
+      list.map(x => x.t == id ? Object.assign(x, {
+        category, number: phone, group, m: +new Date
+      }) : x)
+
+      updated = await APP_UTIL.fireStoreSimple.set('kv/important-phone-numbers', { list })
+    }
+
+    return res.sendJSON({
+      success: Boolean(updated),
+      list: this.prepareRawList(list)
+    })
+  },
+
 
     // // console.log( await APP_UTIL.fireStoreSimple.get('posts/intro-to-firestore') )
     // console.log( await APP_UTIL.fireStoreSimple.get('kv/important-phone-numbers') )
@@ -98,6 +151,28 @@ module.exports = {
 
   async httpDelete( req, res )
   {
-    // @todo
+    let { id: ids } = req.parsedQuery
+    ids = (Array.isArray(ids) ? ids : [ids]).map(id => +id).filter(Boolean)
+
+    let list_origin = ((await APP_UTIL.fireStoreSimple.get('kv/important-phone-numbers'))||{}).list || [], list
+
+    if ( list_origin.length == 0 )
+      return res.sendJSON({
+        success: Boolean(updated),
+        list: this.prepareRawList(list_origin)
+      })
+
+    list = list_origin.map(x => ids.indexOf(x.t) >= 0 ? null : x).filter(Boolean)
+
+    let updated = true
+
+    if ( list.length !== list_origin.length ) {
+      updated = await APP_UTIL.fireStoreSimple.set('kv/important-phone-numbers', { list })
+    }
+
+    return res.sendJSON({
+      success: Boolean(updated),
+      list: this.prepareRawList(list)
+    })
   },
 }
