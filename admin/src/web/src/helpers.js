@@ -1,4 +1,3 @@
-import { SCRIPT_TEMPLATE } from './config'
 import * as _configs from './config'
 
 export const config = (key, _default=null) =>

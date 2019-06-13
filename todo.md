@@ -10,6 +10,7 @@
 - [ ] super admin has caps of normal admins, plus managing all user roles
 - [ ] notifications preference for mods
 - [ ] Safari auth issue
+- [ ] news/events/Pratique(phone #s) management
 
 <!-- and more to come -->
 

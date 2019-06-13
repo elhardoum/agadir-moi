@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 
-import Loading from './Loading'
+import Loading from './../misc/Loading'
 
 import { Redirect } from 'react-router-dom'
 
@@ -17,7 +17,7 @@ export default class Logout extends Component
       }).then(res => res.json())
 
       if ( res && res.success ) {
-        this.props.setGlobalState( { user: {} } )
+        this.props.updateUser({})
         return location.assign('/')
       }
     } catch (e) {

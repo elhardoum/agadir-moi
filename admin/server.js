@@ -47,8 +47,13 @@ const http = require('http'), server = http.createServer(async (req, res) =>
       case 'POST auth/profile-edit':
       case 'POST users/password-reset':
       case 'POST admin/users/create':
-        const users = require('./src/api/users')
-        return users.http( request_name, req, res, default_callback )
+        return require('./src/api/users').http( request_name, req, res, default_callback )
+      
+      case 'PUT important-phone-numbers':
+      case 'POST important-phone-numbers':
+      case 'GET important-phone-numbers':
+      case 'DELETE important-phone-numbers':
+        return require('./src/api/phones').http( request_name, req, res, default_callback )
 
       default:
         return default_callback()
@@ -67,11 +72,3 @@ const http = require('http'), server = http.createServer(async (req, res) =>
 
 server.listen(process.env.PORT||9090, process.env.HOST||'0.0.0.0', _ =>
   console.log(`Server running at http://${process.env.HOST||'0.0.0.0'}:${process.env.PORT||9090}/`))
-
-process.env.SKIP_AUTO_CREATE_SUPER_ADMIN || require('./src/api/users').cliMaybeRegisterFirstSuperAdmin(_ =>
-{
-  global.APP_CONFIG = global.APP_CONFIG || require('./src/api/config')
-  global.APP_UTIL = global.APP_UTIL || require('./src/api/util')
-  global.DB_OBJECT = global.DB_OBJECT || require('./src/api/db')
-  return 1
-})

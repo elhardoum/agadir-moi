@@ -68,4 +68,55 @@ module.exports = {
   {
     return `${base.replace(/\/{1,}$/g, '')}/${path.replace(/^\/{1,}/g, '')}`
   },
+
+  fireStoreSimple:
+  {
+    _client: undefined,
+
+    getClient()
+    {
+      if ( this._client )
+        return this._client
+
+      const { Firestore } = require('@google-cloud/firestore')
+
+      return this._client = new Firestore()
+    },
+
+    async get( docId )
+    {
+      const doc = this.getClient().doc( docId )
+
+      try {
+        return (await doc.get()).data()
+      } catch(e) { /* pass */ }
+    },
+
+    async set( docId, data )
+    {
+      const doc = this.getClient().doc( docId )
+
+      try {
+        return await doc.set( data )
+      } catch(e) { /* pass */ }
+    },
+
+    async update( docId, data )
+    {
+      const doc = this.getClient().doc( docId )
+
+      try {
+        return await doc.update( data )
+      } catch(e) { /* pass */ }
+    },
+
+    async delete( docId )
+    {
+      const doc = this.getClient().doc( docId )
+
+      try {
+        return await doc.delete()
+      } catch(e) { /* pass */ }
+    }
+  },
 }

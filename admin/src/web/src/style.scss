@@ -213,7 +213,6 @@ html {
                     position: absolute;
                     top: 7px;
                     left: 200px;
-                    cursor: pointer;
                     display: block;
                 }
             }
@@ -234,8 +233,8 @@ html {
     background: #24a7be;
 }
 
-.hover\:bg-orange-light-2:hover {
-    background: #ff6e3e;
+.hover\:bg-blue-light-2:hover {
+    background: #39c5de;
 }
 
 .focus\:border-blue-2:focus,

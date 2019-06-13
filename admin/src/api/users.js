@@ -101,12 +101,28 @@ module.exports = {
   {
     const user = await this.getCurrentUser( req )
 
+    if ( ! process.env.SKIP_AUTO_CREATE_SUPER_ADMIN && ! ('auto_create_super_admin_attempt' in global) ) {
+      this.cliMaybeRegisterFirstSuperAdmin()
+      global.auto_create_super_admin_attempt = 1
+    }
+
     if ( user ) {
       delete user.password
       delete user.reset_token
       delete user.auth_key
 
       user.gravatar = `https://www.gravatar.com/avatar/${require('crypto').createHash('md5').update(user.email).digest('hex')}?d=mp`
+
+      if ( user.roles.indexOf('super-admin') >= 0 ) {
+        user.granted_roles = APP_CONFIG.USER_ROLES
+      } else if ( user.roles.indexOf('admin') >= 0 ) {
+        user.granted_roles = APP_CONFIG.USER_ROLES
+        user.granted_roles.indexOf('super-admin') >= 0 && user.granted_roles.splice(user.granted_roles.indexOf('super-admin'), 1)
+      } else if ( user.roles.indexOf('moderator') >= 0 ) {
+        user.granted_roles = APP_CONFIG.USER_ROLES
+        user.granted_roles.indexOf('super-admin') >= 0 && user.granted_roles.splice(user.granted_roles.indexOf('super-admin'), 1)
+        user.granted_roles.indexOf('admin') >= 0 && user.granted_roles.splice(user.granted_roles.indexOf('admin'), 1)
+      }
 
       return res.sendJSON(user)
     } else {
@@ -118,6 +134,7 @@ module.exports = {
   {
     raw.id = +raw.id
     raw.registered = +raw.registered
+    raw.roles = (raw.roles||'').split(',').map(r => r.trim()).filter(Boolean).filter(x => APP_CONFIG.USER_ROLES.indexOf(x) >= 0)
 
     return raw
   },
@@ -144,6 +161,10 @@ module.exports = {
 
     delete fields['id']
 
+    if ( 'roles' in fields && Array.isArray(fields['roles']) ) {
+      fields['roles'] = this.prepareUserObject(fields).roles.join(',')
+    }
+
     try {
       const query = await pg.query(
         `UPDATE users set ${Object.keys(fields).map( (f, i) => `${f} = $${i+1}` ).join(', ')} where id = $${Object.keys(fields).length+1} returning id`,
@@ -164,6 +185,10 @@ module.exports = {
     const pg = await DB_OBJECT.getClient()
 
     delete user['id']
+
+    if ( 'roles' in user && Array.isArray(user['roles']) ) {
+      user['roles'] = this.prepareUserObject(user).roles.join(',')
+    }
 
     try {
       const query = await pg.query(
@@ -295,7 +320,7 @@ module.exports = {
 
     if ( ! email ) {
       errors.push({field: 'email', error: 'Please enter an email address.'})
-    } else if ( ! /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(email) ) {
+    } else if ( ! APP_UTIL.is_email(email) ) {
       errors.push({field: 'email', error: 'Please enter a valid email address.'})
     }
 
@@ -463,11 +488,8 @@ module.exports = {
     }
   },
 
-  async cliMaybeRegisterFirstSuperAdmin(init)
+  async cliMaybeRegisterFirstSuperAdmin()
   {
-    if ( ! init() )
-      return
-
     if ( ! process.env.SUPER_ADMIN_EMAIL || ! APP_UTIL.is_email(process.env.SUPER_ADMIN_EMAIL) )
       return console.log( 'api/users#cliMaybeRegisterFirstSuperAdmin: no valid ENV SUPER_ADMIN_EMAIL supplied' )
 

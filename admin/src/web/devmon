@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+nodemon -w ./src -x 'clear; npm run start' -e js,html,css,scss

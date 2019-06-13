@@ -28,6 +28,7 @@
     "abortcontroller-polyfill": "^1.2.1",
     "blob": "0.0.5",
     "react": "^16.7.0",
+    "react-autocomplete": "^1.8.1",
     "react-dom": "^16.7.0",
     "react-router-dom": "^5.0.0",
     "whatwg-fetch": "^3.0.0"

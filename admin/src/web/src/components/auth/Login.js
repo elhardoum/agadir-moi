@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { title, is_email } from './../helpers'
+import { title, is_email } from './../../helpers'
 
 import { Link, Redirect } from 'react-router-dom'
 
@@ -131,7 +131,7 @@ export default class Login extends Component
           </div>
 
           <div className="flex items-center">
-            <button className="bg-blue-2 hover:bg-orange-light-2 focus:outline-none font-bold px-4 py-2 rounded shadow text-sm text-white mr-2" type="submit">
+            <button className="bg-blue-2 hover:bg-blue-light-2 focus:outline-none font-bold px-4 py-2 rounded shadow text-sm text-white mr-2" type="submit">
               Sign In
             </button>
 
@@ -140,8 +140,6 @@ export default class Login extends Component
           </div>
 
           <p className="mt-5"><Link className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker cursor-pointer" to='/lost-password'>Forgot your password?</Link></p>
-          <p className="mt-2 text-sm text-grey-darker">Don't have an account? <Link className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker cursor-pointer" to='/register'>Sign Up</Link>
-          </p>
         </form>
       </div>
     )

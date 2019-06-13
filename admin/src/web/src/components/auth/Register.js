@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { title, is_email } from './../helpers'
+import { title, is_email } from './../../helpers'
 
 import { Link, Redirect } from 'react-router-dom'
 

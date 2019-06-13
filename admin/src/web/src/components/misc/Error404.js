@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { title } from './../helpers'
+import { title } from './../../helpers'
 import { Link } from 'react-router-dom'
 
 export default class Error404 extends Component

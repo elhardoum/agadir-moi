@@ -25,6 +25,8 @@ module.exports = {
     }
   },
 
+  USER_ROLES: ['super-admin', 'admin', 'moderator'],
+
   MAIL_DEFAULTS: {
     from: 'Agadir & Moi <info@elh.solutions>',
   },

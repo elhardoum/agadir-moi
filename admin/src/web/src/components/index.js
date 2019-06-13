@@ -2,14 +2,16 @@ import React, { Component } from 'react'
 
 import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom'
 
-import Loading from './Loading'
-import Login from './Login'
-import LostPassword from './LostPassword'
-import ResetPassword from './ResetPassword'
-import AccountSettings from './AccountSettings'
-import Logout from './Logout'
-import Error404 from './Error404'
-import Account from './Account'
+import Loading from './misc/Loading'
+import Login from './auth/Login'
+import LostPassword from './auth/LostPassword'
+import ResetPassword from './auth/ResetPassword'
+import AccountSettings from './auth/AccountSettings'
+import Logout from './auth/Logout'
+import Error404 from './misc/Error404'
+import Home from './misc/Home'
+import ImportantPhoneNumbers from './phones/'
+import ImportantPhoneNumbersNew from './phones/new'
 
 import './../style.scss'
 
@@ -156,12 +158,22 @@ export default class Wrap extends Component
                 <img src="/assets/images/logo.png" className="h-10 w-10" />
               </Link>
             </li>
-            <li className="nav-item block has-child">
+
+            { user && (user.granted_roles||[]).indexOf('moderator') >= 0 && <li className="nav-item block">
               <Link to='/complaints' className="flex items-center" onClick={e => this.maybeCloseMenu()}>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M10 0C4.47581 0 0 4.47581 0 10C0 15.5242 4.47581 20 10 20C15.5242 20 20 15.5242 20 10C20 4.47581 15.5242 0 10 0ZM10 3.87097C11.9597 3.87097 13.5484 5.45968 13.5484 7.41935C13.5484 9.37903 11.9597 10.9677 10 10.9677C8.04032 10.9677 6.45161 9.37903 6.45161 7.41935C6.45161 5.45968 8.04032 3.87097 10 3.87097ZM10 17.7419C7.63306 17.7419 5.5121 16.6694 4.09274 14.9919C4.85081 13.5645 6.33468 12.5806 8.06452 12.5806C8.16129 12.5806 8.25806 12.5968 8.35081 12.625C8.875 12.7944 9.42339 12.9032 10 12.9032C10.5766 12.9032 11.129 12.7944 11.6492 12.625C11.7419 12.5968 11.8387 12.5806 11.9355 12.5806C13.6653 12.5806 15.1492 13.5645 15.9073 14.9919C14.4879 16.6694 12.3669 17.7419 10 17.7419Z" fill="white"></path>
                 </svg>
                 <span className="ml-2">Complaints</span>
+              </Link>
+            </li> }
+
+            { user && (user.granted_roles||[]).join('').indexOf('admin') >= 0 && <li className="nav-item block has-child">
+              <Link to='/news' className="flex items-center" onClick={e => this.maybeCloseMenu()}>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M10 0C4.47581 0 0 4.47581 0 10C0 15.5242 4.47581 20 10 20C15.5242 20 20 15.5242 20 10C20 4.47581 15.5242 0 10 0ZM10 3.87097C11.9597 3.87097 13.5484 5.45968 13.5484 7.41935C13.5484 9.37903 11.9597 10.9677 10 10.9677C8.04032 10.9677 6.45161 9.37903 6.45161 7.41935C6.45161 5.45968 8.04032 3.87097 10 3.87097ZM10 17.7419C7.63306 17.7419 5.5121 16.6694 4.09274 14.9919C4.85081 13.5645 6.33468 12.5806 8.06452 12.5806C8.16129 12.5806 8.25806 12.5968 8.35081 12.625C8.875 12.7944 9.42339 12.9032 10 12.9032C10.5766 12.9032 11.129 12.7944 11.6492 12.625C11.7419 12.5968 11.8387 12.5806 11.9355 12.5806C13.6653 12.5806 15.1492 13.5645 15.9073 14.9919C14.4879 16.6694 12.3669 17.7419 10 17.7419Z" fill="white"></path>
+                </svg>
+                <span className="ml-2">News</span>
                 <svg className="ml-2 submenu-hint" xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10" fill="none">
                   <path d="M12.5986 0.875H1.40168C0.158084 0.875 -0.469378 2.35691 0.411747 3.22225L6.01008 8.72225C6.55678 9.25919 7.44325 9.25923 7.98999 8.72225L13.5886 3.22225C14.4679 2.35862 13.8447 0.875 12.5986 0.875ZM7.00001 7.75L1.40002 2.25H12.6L7.00001 7.75Z" fill="white"/>
                 </svg>
@@ -172,17 +184,72 @@ export default class Wrap extends Component
               <div className="subnav">
                 <ul className="list-reset">
                   <li>
-                    <Link to='/complaints/categories' className="flex items-center" onClick={e => (hideSubnav(), this.maybeCloseMenu())}>
-                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M10 0C4.47581 0 0 4.47581 0 10C0 15.5242 4.47581 20 10 20C15.5242 20 20 15.5242 20 10C20 4.47581 15.5242 0 10 0ZM10 3.87097C11.9597 3.87097 13.5484 5.45968 13.5484 7.41935C13.5484 9.37903 11.9597 10.9677 10 10.9677C8.04032 10.9677 6.45161 9.37903 6.45161 7.41935C6.45161 5.45968 8.04032 3.87097 10 3.87097ZM10 17.7419C7.63306 17.7419 5.5121 16.6694 4.09274 14.9919C4.85081 13.5645 6.33468 12.5806 8.06452 12.5806C8.16129 12.5806 8.25806 12.5968 8.35081 12.625C8.875 12.7944 9.42339 12.9032 10 12.9032C10.5766 12.9032 11.129 12.7944 11.6492 12.625C11.7419 12.5968 11.8387 12.5806 11.9355 12.5806C13.6653 12.5806 15.1492 13.5645 15.9073 14.9919C14.4879 16.6694 12.3669 17.7419 10 17.7419Z" fill="white"></path>
+                    <Link to='/news/new' className="flex items-center" onClick={e => (hideSubnav(), this.maybeCloseMenu())}>
+                      <svg className="fill-current" width="17" height="15" fill="none" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 304.223 304.223">
+                        <g> <g> <path d="M152.112,0C68.241,0,0.008,68.244,0.008,152.114c0,83.865,68.233,152.109,152.103,152.109 c83.865,0,152.103-68.244,152.103-152.109C304.215,68.244,235.977,0,152.112,0z M152.112,275.989 c-68.32,0-123.891-55.565-123.891-123.875c0-68.326,55.571-123.891,123.891-123.891s123.891,55.565,123.891,123.891 C276.003,220.424,220.426,275.989,152.112,275.989z"></path> <path d="M221.922,139.186h-56.887V82.298c0-7.141-5.782-12.929-12.923-12.929 c-7.141,0-12.929,5.782-12.929,12.929v56.887H82.296c-7.141,0-12.923,5.782-12.923,12.929c0,7.141,5.782,12.923,12.923,12.923 h56.882v56.893c0,7.142,5.787,12.923,12.929,12.923c7.141,0,12.929-5.782,12.929-12.923v-56.893h56.882 c7.142,0,12.929-5.782,12.929-12.923C234.851,144.967,229.063,139.186,221.922,139.186z"></path> </g> </g>
                       </svg>
-                      <span className="ml-2">Categories</span>
+                      <span className="ml-2">Add New</span>
                     </Link>
                   </li>
                 </ul>
               </div>
-            </li>
-            <li className="nav-item block has-child">
+            </li> }
+
+            { user && (user.granted_roles||[]).join('').indexOf('admin') >= 0 && <li className="nav-item block has-child">
+              <Link to='/important-phone-numbers' className="flex items-center" onClick={e => this.maybeCloseMenu()}>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M10 0C4.47581 0 0 4.47581 0 10C0 15.5242 4.47581 20 10 20C15.5242 20 20 15.5242 20 10C20 4.47581 15.5242 0 10 0ZM10 3.87097C11.9597 3.87097 13.5484 5.45968 13.5484 7.41935C13.5484 9.37903 11.9597 10.9677 10 10.9677C8.04032 10.9677 6.45161 9.37903 6.45161 7.41935C6.45161 5.45968 8.04032 3.87097 10 3.87097ZM10 17.7419C7.63306 17.7419 5.5121 16.6694 4.09274 14.9919C4.85081 13.5645 6.33468 12.5806 8.06452 12.5806C8.16129 12.5806 8.25806 12.5968 8.35081 12.625C8.875 12.7944 9.42339 12.9032 10 12.9032C10.5766 12.9032 11.129 12.7944 11.6492 12.625C11.7419 12.5968 11.8387 12.5806 11.9355 12.5806C13.6653 12.5806 15.1492 13.5645 15.9073 14.9919C14.4879 16.6694 12.3669 17.7419 10 17.7419Z" fill="white"></path>
+                </svg>
+                <span className="ml-2">Important Phones</span>
+                <svg className="ml-2 submenu-hint" xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10" fill="none">
+                  <path d="M12.5986 0.875H1.40168C0.158084 0.875 -0.469378 2.35691 0.411747 3.22225L6.01008 8.72225C6.55678 9.25919 7.44325 9.25923 7.98999 8.72225L13.5886 3.22225C14.4679 2.35862 13.8447 0.875 12.5986 0.875ZM7.00001 7.75L1.40002 2.25H12.6L7.00001 7.75Z" fill="white"/>
+                </svg>
+              </Link>
+
+              <svg className="subarrow" width="17" height="15" viewBox="0 0 17 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.5 0L16.7272 14.25H0.272758L8.5 0Z"></path></svg>
+
+              <div className="subnav">
+                <ul className="list-reset">
+                  <li>
+                    <Link to='/important-phone-numbers/new' className="flex items-center" onClick={e => (hideSubnav(), this.maybeCloseMenu())}>
+                      <svg className="fill-current" width="17" height="15" fill="none" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 304.223 304.223">
+                        <g> <g> <path d="M152.112,0C68.241,0,0.008,68.244,0.008,152.114c0,83.865,68.233,152.109,152.103,152.109 c83.865,0,152.103-68.244,152.103-152.109C304.215,68.244,235.977,0,152.112,0z M152.112,275.989 c-68.32,0-123.891-55.565-123.891-123.875c0-68.326,55.571-123.891,123.891-123.891s123.891,55.565,123.891,123.891 C276.003,220.424,220.426,275.989,152.112,275.989z"></path> <path d="M221.922,139.186h-56.887V82.298c0-7.141-5.782-12.929-12.923-12.929 c-7.141,0-12.929,5.782-12.929,12.929v56.887H82.296c-7.141,0-12.923,5.782-12.923,12.929c0,7.141,5.782,12.923,12.923,12.923 h56.882v56.893c0,7.142,5.787,12.923,12.929,12.923c7.141,0,12.929-5.782,12.929-12.923v-56.893h56.882 c7.142,0,12.929-5.782,12.929-12.923C234.851,144.967,229.063,139.186,221.922,139.186z"></path> </g> </g>
+                      </svg>
+                      <span className="ml-2">Add New</span>
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+            </li> }
+
+            { user && (user.granted_roles||[]).join('').indexOf('admin') >= 0 && <li className="nav-item block has-child">
+              <Link to='/events' className="flex items-center" onClick={e => this.maybeCloseMenu()}>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M10 0C4.47581 0 0 4.47581 0 10C0 15.5242 4.47581 20 10 20C15.5242 20 20 15.5242 20 10C20 4.47581 15.5242 0 10 0ZM10 3.87097C11.9597 3.87097 13.5484 5.45968 13.5484 7.41935C13.5484 9.37903 11.9597 10.9677 10 10.9677C8.04032 10.9677 6.45161 9.37903 6.45161 7.41935C6.45161 5.45968 8.04032 3.87097 10 3.87097ZM10 17.7419C7.63306 17.7419 5.5121 16.6694 4.09274 14.9919C4.85081 13.5645 6.33468 12.5806 8.06452 12.5806C8.16129 12.5806 8.25806 12.5968 8.35081 12.625C8.875 12.7944 9.42339 12.9032 10 12.9032C10.5766 12.9032 11.129 12.7944 11.6492 12.625C11.7419 12.5968 11.8387 12.5806 11.9355 12.5806C13.6653 12.5806 15.1492 13.5645 15.9073 14.9919C14.4879 16.6694 12.3669 17.7419 10 17.7419Z" fill="white"></path>
+                </svg>
+                <span className="ml-2">Events</span>
+                <svg className="ml-2 submenu-hint" xmlns="http://www.w3.org/2000/svg" width="14" height="10" viewBox="0 0 14 10" fill="none">
+                  <path d="M12.5986 0.875H1.40168C0.158084 0.875 -0.469378 2.35691 0.411747 3.22225L6.01008 8.72225C6.55678 9.25919 7.44325 9.25923 7.98999 8.72225L13.5886 3.22225C14.4679 2.35862 13.8447 0.875 12.5986 0.875ZM7.00001 7.75L1.40002 2.25H12.6L7.00001 7.75Z" fill="white"/>
+                </svg>
+              </Link>
+
+              <svg className="subarrow" width="17" height="15" viewBox="0 0 17 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.5 0L16.7272 14.25H0.272758L8.5 0Z"></path></svg>
+
+              <div className="subnav">
+                <ul className="list-reset">
+                  <li>
+                    <Link to='/events/new' className="flex items-center" onClick={e => (hideSubnav(), this.maybeCloseMenu())}>
+                      <svg className="fill-current" width="17" height="15" fill="none" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 304.223 304.223">
+                        <g> <g> <path d="M152.112,0C68.241,0,0.008,68.244,0.008,152.114c0,83.865,68.233,152.109,152.103,152.109 c83.865,0,152.103-68.244,152.103-152.109C304.215,68.244,235.977,0,152.112,0z M152.112,275.989 c-68.32,0-123.891-55.565-123.891-123.875c0-68.326,55.571-123.891,123.891-123.891s123.891,55.565,123.891,123.891 C276.003,220.424,220.426,275.989,152.112,275.989z"></path> <path d="M221.922,139.186h-56.887V82.298c0-7.141-5.782-12.929-12.923-12.929 c-7.141,0-12.929,5.782-12.929,12.929v56.887H82.296c-7.141,0-12.923,5.782-12.923,12.929c0,7.141,5.782,12.923,12.923,12.923 h56.882v56.893c0,7.142,5.787,12.923,12.929,12.923c7.141,0,12.929-5.782,12.929-12.923v-56.893h56.882 c7.142,0,12.929-5.782,12.929-12.923C234.851,144.967,229.063,139.186,221.922,139.186z"></path> </g> </g>
+                      </svg>
+                      <span className="ml-2">Add New</span>
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+            </li> }
+
+            { user && (user.granted_roles||[]).indexOf('super-admin') >= 0 && <li className="nav-item block has-child">
               <Link to='/users' className="flex items-center" onClick={e => this.maybeCloseMenu()}>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M10 0C4.47581 0 0 4.47581 0 10C0 15.5242 4.47581 20 10 20C15.5242 20 20 15.5242 20 10C20 4.47581 15.5242 0 10 0ZM10 3.87097C11.9597 3.87097 13.5484 5.45968 13.5484 7.41935C13.5484 9.37903 11.9597 10.9677 10 10.9677C8.04032 10.9677 6.45161 9.37903 6.45161 7.41935C6.45161 5.45968 8.04032 3.87097 10 3.87097ZM10 17.7419C7.63306 17.7419 5.5121 16.6694 4.09274 14.9919C4.85081 13.5645 6.33468 12.5806 8.06452 12.5806C8.16129 12.5806 8.25806 12.5968 8.35081 12.625C8.875 12.7944 9.42339 12.9032 10 12.9032C10.5766 12.9032 11.129 12.7944 11.6492 12.625C11.7419 12.5968 11.8387 12.5806 11.9355 12.5806C13.6653 12.5806 15.1492 13.5645 15.9073 14.9919C14.4879 16.6694 12.3669 17.7419 10 17.7419Z" fill="white"></path>
@@ -199,15 +266,16 @@ export default class Wrap extends Component
                 <ul className="list-reset">
                   <li>
                     <Link to='/users/new' className="flex items-center" onClick={e => (hideSubnav(), this.maybeCloseMenu())}>
-                      <svg className="inline" width="20" height="17" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12.7583 7.24186C15.0922 9.57815 15.0601 13.3238 12.7724 15.6243C12.7681 15.629 12.763 15.634 12.7583 15.6387L10.1333 18.2637C7.81807 20.579 4.05131 20.5787 1.73643 18.2637C-0.578809 15.9489 -0.578809 12.1817 1.73643 9.86686L3.18588 8.4174C3.57026 8.03303 4.23221 8.2885 4.25205 8.8317C4.27736 9.52397 4.40151 10.2195 4.63057 10.8911C4.70815 11.1185 4.65272 11.3701 4.48279 11.54L3.97158 12.0512C2.87682 13.146 2.84248 14.9286 3.92647 16.034C5.02115 17.1504 6.82045 17.1571 7.92354 16.054L10.5485 13.4294C11.6497 12.3281 11.6451 10.5482 10.5485 9.45162C10.404 9.30733 10.2583 9.19522 10.1446 9.1169C10.0641 9.06164 9.99768 8.98833 9.95056 8.90284C9.90345 8.81734 9.87696 8.72202 9.87323 8.62447C9.85776 8.2117 10.004 7.78635 10.3302 7.46018L11.1526 6.63772C11.3683 6.42205 11.7066 6.39557 11.9567 6.5701C12.2431 6.77008 12.5113 6.99486 12.7583 7.24186ZM18.2636 1.73631C15.9487 -0.578613 12.1819 -0.578926 9.8667 1.73631L7.2417 4.36131C7.23701 4.366 7.23194 4.37107 7.22764 4.37576C4.9399 6.67623 4.90783 10.4219 7.2417 12.7582C7.48869 13.0052 7.75692 13.2299 8.0433 13.4299C8.29338 13.6044 8.63174 13.5779 8.84737 13.3623L9.66979 12.5398C9.99596 12.2137 10.1422 11.7883 10.1267 11.3755C10.123 11.278 10.0965 11.1827 10.0494 11.0972C10.0023 11.0117 9.93585 10.9384 9.85537 10.8831C9.74162 10.8048 9.596 10.6927 9.45143 10.5484C8.35483 9.45178 8.35022 7.67186 9.45143 6.57064L12.0764 3.94604C13.1795 2.84295 14.9788 2.84959 16.0735 3.96596C17.1575 5.07143 17.1232 6.854 16.0284 7.94877L15.5172 8.45998C15.3473 8.6299 15.2918 8.88147 15.3694 9.10889C15.5985 9.78053 15.7226 10.476 15.7479 11.1683C15.7678 11.7115 16.4297 11.967 16.8141 11.5826L18.2635 10.1331C20.5788 7.81834 20.5788 4.05115 18.2636 1.73631Z" fill="white"/>
+                      <svg className="fill-current" width="17" height="15" fill="none" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 304.223 304.223">
+                        <g> <g> <path d="M152.112,0C68.241,0,0.008,68.244,0.008,152.114c0,83.865,68.233,152.109,152.103,152.109 c83.865,0,152.103-68.244,152.103-152.109C304.215,68.244,235.977,0,152.112,0z M152.112,275.989 c-68.32,0-123.891-55.565-123.891-123.875c0-68.326,55.571-123.891,123.891-123.891s123.891,55.565,123.891,123.891 C276.003,220.424,220.426,275.989,152.112,275.989z"></path> <path d="M221.922,139.186h-56.887V82.298c0-7.141-5.782-12.929-12.923-12.929 c-7.141,0-12.929,5.782-12.929,12.929v56.887H82.296c-7.141,0-12.923,5.782-12.923,12.929c0,7.141,5.782,12.923,12.923,12.923 h56.882v56.893c0,7.142,5.787,12.923,12.929,12.923c7.141,0,12.929-5.782,12.929-12.923v-56.893h56.882 c7.142,0,12.929-5.782,12.929-12.923C234.851,144.967,229.063,139.186,221.922,139.186z"></path> </g> </g>
                       </svg>
-                      <span className="ml-2">New User</span>
+                      <span className="ml-2">Add New</span>
                     </Link>
                   </li>
                 </ul>
               </div>
-            </li>
+            </li> }
+
             <li className="nav-item block">
               <Link to='/settings' className="flex items-center" onClick={e => this.maybeCloseMenu()}>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -238,6 +306,14 @@ export default class Wrap extends Component
                         <path d="M10 0C4.47581 0 0 4.47581 0 10C0 15.5242 4.47581 20 10 20C15.5242 20 20 15.5242 20 10C20 4.47581 15.5242 0 10 0ZM10 3.87097C11.9597 3.87097 13.5484 5.45968 13.5484 7.41935C13.5484 9.37903 11.9597 10.9677 10 10.9677C8.04032 10.9677 6.45161 9.37903 6.45161 7.41935C6.45161 5.45968 8.04032 3.87097 10 3.87097ZM10 17.7419C7.63306 17.7419 5.5121 16.6694 4.09274 14.9919C4.85081 13.5645 6.33468 12.5806 8.06452 12.5806C8.16129 12.5806 8.25806 12.5968 8.35081 12.625C8.875 12.7944 9.42339 12.9032 10 12.9032C10.5766 12.9032 11.129 12.7944 11.6492 12.625C11.7419 12.5968 11.8387 12.5806 11.9355 12.5806C13.6653 12.5806 15.1492 13.5645 15.9073 14.9919C14.4879 16.6694 12.3669 17.7419 10 17.7419Z" fill="white"/>
                       </svg>
                       <span className="ml-2">My Account</span>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to='/account/settings' className="flex items-center" onClick={e => (hideSubnav(), this.maybeCloseMenu())}>
+                      <svg className="inline" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 0C4.47581 0 0 4.47581 0 10C0 15.5242 4.47581 20 10 20C15.5242 20 20 15.5242 20 10C20 4.47581 15.5242 0 10 0ZM10 3.87097C11.9597 3.87097 13.5484 5.45968 13.5484 7.41935C13.5484 9.37903 11.9597 10.9677 10 10.9677C8.04032 10.9677 6.45161 9.37903 6.45161 7.41935C6.45161 5.45968 8.04032 3.87097 10 3.87097ZM10 17.7419C7.63306 17.7419 5.5121 16.6694 4.09274 14.9919C4.85081 13.5645 6.33468 12.5806 8.06452 12.5806C8.16129 12.5806 8.25806 12.5968 8.35081 12.625C8.875 12.7944 9.42339 12.9032 10 12.9032C10.5766 12.9032 11.129 12.7944 11.6492 12.625C11.7419 12.5968 11.8387 12.5806 11.9355 12.5806C13.6653 12.5806 15.1492 13.5645 15.9073 14.9919C14.4879 16.6694 12.3669 17.7419 10 17.7419Z" fill="white"/>
+                      </svg>
+                      <span className="ml-2">Edit Profile</span>
                     </Link>
                   </li>
                   <li>
@@ -276,10 +352,17 @@ export default class Wrap extends Component
           <Route exact path='/login' render={routerProps => renderProxy(<Login {...routerProps} {...props} />, routerProps)} />
           <Route exact path='/lost-password' render={routerProps => renderProxy(<LostPassword {...routerProps} {...props} />, routerProps)} />
           <Route exact path='/reset-password/:token' render={routerProps => renderProxy(<ResetPassword {...routerProps} {...props} />, routerProps)} />
+          { ! (user||{}).id && <Route exact path='/' render={routerProps => renderProxy(<Login {...routerProps} {...props} />, routerProps)} />}
 
+          {user && user.id && <Route exact path='/' render={routerProps => renderProxy(<Home {...routerProps} {...props} />, routerProps)} />}
           {user && user.id && <Route exact path='/logout' render={routerProps => renderProxy(<Logout {...routerProps} {...props} />, routerProps)} />}
-          {user && user.id && <Route exact path='/account' render={routerProps => renderProxy(<Account {...routerProps} {...props} />, routerProps)} />}
+          {user && user.id && <Route exact path='/account' render={routerProps => renderProxy(<AccountSettings {...routerProps} {...props} />, routerProps)} />}
           {user && user.id && <Route exact path='/account/settings' render={routerProps => renderProxy(<AccountSettings {...routerProps} {...props} />, routerProps)} />}
+
+          {user && (user.granted_roles||[]).join('').indexOf('super-admin') >= 0
+            && <Route exact path='/important-phone-numbers' render={routerProps => renderProxy(<ImportantPhoneNumbers {...routerProps} {...props} />, routerProps)} />}
+          {user && (user.granted_roles||[]).join('').indexOf('super-admin') >= 0
+            && <Route exact path='/important-phone-numbers/new' render={routerProps => renderProxy(<ImportantPhoneNumbersNew {...routerProps} {...props} />, routerProps)} />}
 
           <Route render={routerProps => renderProxy(<Error404 {...routerProps} {...props} />, routerProps)} />
         </Switch>
