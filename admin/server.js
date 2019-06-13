@@ -46,7 +46,11 @@ const http = require('http'), server = http.createServer(async (req, res) =>
       case 'POST auth/lost-password':
       case 'POST auth/profile-edit':
       case 'POST users/password-reset':
-      case 'POST admin/users/create':
+      case 'PUT users/manage':
+      case 'POST users/manage':
+      case 'GET users/manage':
+      case 'DELETE users/manage':
+      case 'PATCH users/manage':
         return require('./src/api/users').http( request_name, req, res, default_callback )
       
       case 'PUT important-phone-numbers':

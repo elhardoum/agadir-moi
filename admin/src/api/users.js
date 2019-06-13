@@ -23,78 +23,33 @@ module.exports = {
       case 'POST users/password-reset':
         return this.httpPasswordReset( req, res )        
 
+      case 'PUT users/manage':
+      case 'POST users/manage':
+      case 'GET users/manage':
+      case 'DELETE users/manage':
+      case 'PATCH users/manage':
+        return this.permissionsCheckSuperAdmin(req, res, (x, y, user) =>
+        {
+          switch ( slug ) {
+            case 'PUT users/manage':
+            case 'POST users/manage':
+              return this.httpManageCreate( req, res )        
+
+            case 'GET users/manage':
+              return this.httpManageList( req, res )        
+
+            case 'DELETE users/manage':
+              return this.httpManageDelete( req, res, user )        
+
+            case 'PATCH users/manage':
+              return this.httpManageUpdate( req, res )        
+
+            default: return default_callback()
+          }
+        })
+
       default: return default_callback()
     }
-  },
-
-  // @todo add roles
-  async httpCreate( req, res )
-  {
-    let { first_name, last_name, email, password } = req.parsedQuery
-
-    first_name = (first_name||'').trim()
-    last_name = (last_name||'').trim()
-    email = (email||'').trim()
-
-    let errors = []
-
-    if ( ! first_name ) {
-      errors.push({field: 'first_name', error: 'Please enter a first name.'})
-    }
-
-    if ( ! last_name ) {
-      errors.push({field: 'last_name', error: 'Please enter a last name.'})
-    }
-
-    if ( ! email ) {
-      errors.push({field: 'email', error: 'Please enter an email address.'})
-    } else if ( ! APP_UTIL.is_email(email) ) {
-      errors.push({field: 'email', error: 'Please enter a valid email address.'})
-    }
-
-    if ( ! password ) {
-      errors.push({field: 'password', error: 'Please enter your password.'})
-    } else if ( password.length < 6 ) {      
-      errors.push({field: 'password', error: 'Please enter a valid password.'})
-    }
-
-    if ( Object.keys(errors).length ) {
-      return res.sendJSON({ success: false, errors })
-    }
-
-    const pg = await DB_OBJECT.getClient()
-
-    // check if email exists
-    const query = await pg.query('SELECT count(id) from users where email = $1 limit 1', [ email ])
-
-    if ( query.rows && query.rows[0] && query.rows[0].count > 0 ) {
-      errors = [ {field: 'email', error: 'This email is already registered.'} ]
-      return res.sendJSON({ success: false, errors })
-    }
-
-    // hash password
-    const bcrypt = require('bcryptjs')
-    let password_hash = await bcrypt.hash( password, 10 )
-
-    if ( ! password_hash || password_hash.length <= 20 ) {
-      return res.sendJSON({ success: false, errors: [ {error: 'Internal server error'} ] })
-    }
-
-    // insert
-    try {
-      const query = await pg.query(`insert into users (email, first_name, last_name, password, registered) values ($1, $2, $3, $4, $5) returning id`,
-        [email, first_name, last_name, password_hash, +new Date])
-      
-      if ( query.rows[0] && query.rows[0].id ) {
-        return res.sendJSON({ success: true, user_id: query.rows[0].id })
-      }
-    } catch( err ) {
-      console.error('SQL insert user ended with an error', err.stack)
-    }
-
-    errors = [{error: 'Internal server error, could not sign you up.'}]
-
-    res.sendJSON({ success: false, errors })
   },
 
   async httpCurrentUser( req, res )
@@ -511,5 +466,216 @@ module.exports = {
     })
 
     console.log(`api/users#cliMaybeRegisterFirstSuperAdmin: task status: ${user_id ? `OK, id=${user_id}` : 'Error'}`)
-  }
+  },
+
+  async permissionsCheckSuperAdmin( req, res, then )
+  {
+    const user = await require('./users').getCurrentUser( req )
+
+    if ( user && user.roles && user.roles.join('').indexOf('admin') >= 0 )
+      return then(req, res, user)
+
+    return res.sendJSON(null, 403)
+  },
+
+  async httpManageCreate(req, res)
+  {
+    let { first_name, last_name, email, password, role } = req.parsedQuery
+
+    first_name = (first_name||'').trim()
+    last_name = (last_name||'').trim()
+    email = (email||'').trim()
+
+    let errors = []
+
+    if ( ! first_name ) {
+      errors.push({field: 'first_name', error: 'Please enter a first name.'})
+    }
+
+    if ( ! last_name ) {
+      errors.push({field: 'last_name', error: 'Please enter a last name.'})
+    }
+
+    if ( ! email ) {
+      errors.push({field: 'email', error: 'Please enter an email address.'})
+    } else if ( ! APP_UTIL.is_email(email) ) {
+      errors.push({field: 'email', error: 'Please enter a valid email address.'})
+    }
+
+    if ( password && password.length < 6 ) {      
+      errors.push({field: 'password', error: 'Please enter a valid password.'})
+    }
+
+    if ( ! role || APP_CONFIG.USER_ROLES.indexOf(role) < 0 ) {
+      errors.push({field: 'role', error: 'Please select a user role.'})
+    }
+
+    if ( Object.keys(errors).length ) {
+      return res.sendJSON({ success: false, errors })
+    }
+
+    const pg = await DB_OBJECT.getClient()
+
+    // check if email exists
+    const query = await pg.query('SELECT count(id) from users where email = $1 limit 1', [ email ])
+
+    if ( query.rows && query.rows[0] && query.rows[0].count > 0 ) {
+      errors = [ {field: 'email', error: 'This email is already registered.'} ]
+      return res.sendJSON({ success: false, errors })
+    }
+
+    // hash password
+    const bcrypt = require('bcryptjs')
+    let password_plain = password || (password=bcrypt.genSaltSync(10).replace(/[^a-z0-9]/gi, '').slice(-15))
+      , password_hash = await bcrypt.hash( password, 10 )
+
+    if ( ! password_hash || password_hash.length <= 20 ) {
+      return res.sendJSON({ success: false, errors: [ {error: 'Internal server error'} ] })
+    }
+
+    // insert
+    try {
+      const query = await pg.query(`insert into users (email, first_name, last_name, password, registered, roles) values ($1, $2, $3, $4, $5, $6) returning id`,
+        [email, first_name, last_name, password_hash, +new Date, role])
+      
+      if ( query.rows[0] && query.rows[0].id ) {
+        let body = APP_CONFIG.USER_WELCOME_EMAIL_BODY, user = { first_name, last_name, email, role, password: password_plain }
+
+        for ( let key in user ) {
+          body = body.replace( new RegExp(`{user.${key}}`, 'g'), user[key] || 'user' )
+        }
+
+        body = body.replace(/\{login_link\}/g, APP_UTIL.url('/login'))
+        body = body.replace(/\{dashboard_link\}/g, APP_UTIL.url('/login'))
+
+        APP_UTIL.mail( user.email, APP_CONFIG.USER_WELCOME_EMAIL_SUBJECT, body, APP_CONFIG.USER_WELCOME_EMAIL_BODY_HTML ? 'html' : null )
+
+        return this.httpManageList(req, res)
+      }
+    } catch( err ) {
+      console.error('SQL insert user ended with an error', err.stack)
+    }
+
+    errors = [{error: 'Internal server error, could not insert user.'}]
+
+    res.sendJSON({ success: false, errors })
+  },
+
+  async httpManageList(req, res)
+  {
+    const pg = await DB_OBJECT.getClient()
+
+    try {
+      const query = await pg.query('SELECT * from users')
+
+      if ( query.rows && query.rows.length ) {
+        return res.sendJSON(query.rows.map(this.prepareUserObject))
+      }
+    } catch (e) {}
+
+    return res.sendJSON(null, 500)
+  },
+
+  async httpManageDelete(req, res, current_user)
+  {
+    let { id } = req.parsedQuery, user, errors = []
+
+    if ( isNaN(+id) || +id <= 0 || ! (user=await this.getUserBy('id', +id)) ) {
+      errors.push({field: 'general', error: 'Could not find a member associated with this id.'})
+      return res.sendJSON({ success: false, errors })
+    } else if ( user.id == current_user.id ) {
+      errors.push({field: 'general', error: 'You cannot delete your own account.'})
+      return res.sendJSON({ success: false, errors })
+    }
+
+    try {
+      const pg = await DB_OBJECT.getClient()
+      await pg.query(`delete from users where id = $1`, [user.id])
+      return this.httpManageList(req, res)
+    } catch (e) {}
+
+    return res.sendJSON({ success: false, errors: [{error: 'Internal server error, could not update user.'}] })
+  },
+
+  async httpManageUpdate(req, res)
+  {
+    let { first_name, last_name, email, password, role, id } = req.parsedQuery, user
+
+    first_name = (first_name||'').trim()
+    last_name = (last_name||'').trim()
+    email = (email||'').trim()
+
+    let errors = []
+
+    if ( isNaN(+id) || +id <= 0 || ! (user=this.getUserBy('id', +id)) ) {
+      errors.push({field: 'general', error: 'Could not find a member associated with this id.'})
+      return res.sendJSON({ success: false, errors })
+    }
+
+    if ( req.parsedQuery.purge_sessions ) {
+      if ( await this.updateUser({ id: +id, auth_key: null }) ) {
+        return this.httpManageList(req, res)
+      } else {
+        return res.sendJSON({ success: false, errors: [{error: 'Internal server error, could not purge sessions.'}] })
+      }
+    }
+
+    if ( ! first_name ) {
+      errors.push({field: 'first_name', error: 'Please enter a first name.'})
+    }
+
+    if ( ! last_name ) {
+      errors.push({field: 'last_name', error: 'Please enter a last name.'})
+    }
+
+    if ( ! email ) {
+      errors.push({field: 'email', error: 'Please enter an email address.'})
+    } else if ( ! APP_UTIL.is_email(email) ) {
+      errors.push({field: 'email', error: 'Please enter a valid email address.'})
+    }
+
+    if ( password && password.length < 6 ) {      
+      errors.push({field: 'password', error: 'Please enter a valid password.'})
+    }
+
+    if ( ! role || APP_CONFIG.USER_ROLES.indexOf(role) < 0 ) {
+      errors.push({field: 'role', error: 'Please select a user role.'})
+    }
+
+    if ( Object.keys(errors).length ) {
+      return res.sendJSON({ success: false, errors })
+    }
+
+    // check if email exists
+    let pre
+    if ( (pre=await this.getUserBy('email', email)) && +pre.id !== +id ) {
+      errors = [ {field: 'email', error: 'This email is already registered.'} ]
+      return res.sendJSON({ success: false, errors })
+    }
+
+    if ( password ) {
+      // hash password
+      password = await require('bcryptjs').hash( password, 10 )
+
+      if ( ! password || password.length <= 20 ) {
+        return res.sendJSON({ success: false, errors: [ {error: 'Internal server error'} ] })
+      }
+    }
+
+    let updated = await this.updateUser({
+      id: +id,
+      first_name,
+      last_name,
+      email,
+      ... ( password ? { password } : null ),
+      ... ( (user.roles||[]).indexOf('super-admin') < 0 ? {roles: role} : null ),
+    })
+
+    if ( updated ) {
+      return this.httpManageList(req, res)
+    } else {
+      return res.sendJSON({ success: false, errors: [{error: 'Internal server error, could not update user.'}] })
+    }
+  },
+
 }

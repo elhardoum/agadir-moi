@@ -13,6 +13,9 @@ import Home from './misc/Home'
 import ImportantPhoneNumbers from './phones/'
 import ImportantPhoneNumbersNew from './phones/new'
 import ImportantPhoneNumbersEdit from './phones/edit'
+import Users from './users/'
+import UsersNew from './users/new'
+import UsersEdit from './users/edit'
 
 import './../style.scss'
 
@@ -360,12 +363,19 @@ export default class Wrap extends Component
           {user && user.id && <Route exact path='/account' render={routerProps => renderProxy(<AccountSettings {...routerProps} {...props} />, routerProps)} />}
           {user && user.id && <Route exact path='/account/settings' render={routerProps => renderProxy(<AccountSettings {...routerProps} {...props} />, routerProps)} />}
 
-          {user && (user.granted_roles||[]).join('').indexOf('super-admin') >= 0
+          {user && (user.granted_roles||[]).join('').indexOf('admin') >= 0
             && <Route exact path='/important-phone-numbers' render={routerProps => renderProxy(<ImportantPhoneNumbers {...routerProps} {...props} />, routerProps)} />}
-          {user && (user.granted_roles||[]).join('').indexOf('super-admin') >= 0
+          {user && (user.granted_roles||[]).join('').indexOf('admin') >= 0
             && <Route exact path='/important-phone-numbers/new' render={routerProps => renderProxy(<ImportantPhoneNumbersNew {...routerProps} {...props} />, routerProps)} />}
-          {user && (user.granted_roles||[]).join('').indexOf('super-admin') >= 0
+          {user && (user.granted_roles||[]).join('').indexOf('admin') >= 0
             && <Route exact path='/important-phone-numbers/edit/:id' render={routerProps => renderProxy(<ImportantPhoneNumbersEdit {...routerProps} {...props} />, routerProps)} />}
+
+          {user && (user.granted_roles||[]).indexOf('super-admin') >= 0
+            && <Route exact path='/users' render={routerProps => renderProxy(<Users {...routerProps} {...props} />, routerProps)} />}
+          {user && (user.granted_roles||[]).indexOf('super-admin') >= 0
+            && <Route exact path='/users/new' render={routerProps => renderProxy(<UsersNew {...routerProps} {...props} />, routerProps)} />}
+          {user && (user.granted_roles||[]).indexOf('super-admin') >= 0
+            && <Route exact path='/users/edit/:id' render={routerProps => renderProxy(<UsersEdit {...routerProps} {...props} />, routerProps)} />}
 
           <Route render={routerProps => renderProxy(<Error404 {...routerProps} {...props} />, routerProps)} />
         </Switch>

@@ -39,6 +39,26 @@ module.exports = {
     *
     * This email is sent to users with a password-reset link to update their passwords
     */
+  USER_WELCOME_EMAIL_SUBJECT: '[Agadir & Moi] Your account was created',
+  USER_WELCOME_EMAIL_BODY: `Dear {user.first_name},
+
+Your account has been created successfully. Get started by signing to your dashboard:
+{dashboard_link}
+
+Use the following password to login:
+{user.password}
+
+Or easily reset your password which is recommended.
+
+Regards,
+Agadir & Moi`,
+  USER_WELCOME_EMAIL_BODY_HTML: false,
+
+  /**
+    * Password Reset email
+    *
+    * This email is sent to users with a password-reset link to update their passwords
+    */
   PASSWORD_RESET_SUBJECT: '[Agadir & Moi] Your Password Reset Link',
   PASSWORD_RESET_BODY: `Dear {user.first_name},
 
