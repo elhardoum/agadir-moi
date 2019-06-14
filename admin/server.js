@@ -60,6 +60,11 @@ const http = require('http'), server = http.createServer(async (req, res) =>
       case 'PATCH important-phone-numbers':
         return require('./src/api/phones').http( request_name, req, res, default_callback )
 
+      case 'PUT storage/images':
+      case 'GET storage/images':
+      case 'DELETE storage/images':
+        return require('./src/api/storage').http( request_name, req, res, default_callback )
+
       default:
         return default_callback()
     }

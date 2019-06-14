@@ -12,8 +12,6 @@ module.exports = {
 
   COOKIES_SALT: ';*Ks|}6Z^J{v?FI;~*J&G{HfZ5Z1+iG5(pCVN!/)>B*7O.67u=h&',
 
-  ROOT_DIR: '/app',
-
   // email SMTP settings
   SMTP: {
     host: 'smtp.zoho.com',

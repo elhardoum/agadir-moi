@@ -173,7 +173,7 @@ module.exports = {
     let payload
 
     try {
-      payload = require('jsonwebtoken').verify(auth_cookie, require('fs').readFileSync(`${APP_CONFIG.ROOT_DIR}/src/pem/auth_rsa.pub`, 'utf8'), {
+      payload = require('jsonwebtoken').verify(auth_cookie, require('fs').readFileSync(`${__dirname}/../pem/auth_rsa.pub`, 'utf8'), {
         algorithm: 'RS256'
       })
     } catch (e) {/*pass*/}
@@ -228,7 +228,7 @@ module.exports = {
 
       if ( user.auth_key ) {
         try {
-          jwt_token = require('jsonwebtoken').sign({key: user.auth_key}, require('fs').readFileSync(`${APP_CONFIG.ROOT_DIR}/src/pem/auth_rsa`, 'utf8'), {
+          jwt_token = require('jsonwebtoken').sign({key: user.auth_key}, require('fs').readFileSync(`${__dirname}/../pem/auth_rsa`, 'utf8'), {
             expiresIn: remember ? '15d' : '1d',
             algorithm: 'RS256'
           })
@@ -472,7 +472,7 @@ module.exports = {
   {
     const user = await require('./users').getCurrentUser( req )
 
-    if ( user && user.roles && user.roles.join('').indexOf('admin') >= 0 )
+    if ( user && user.roles && user.roles.indexOf('super-admin') >= 0 )
       return then(req, res, user)
 
     return res.sendJSON(null, 403)

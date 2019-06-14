@@ -125,23 +125,6 @@ module.exports = {
     })
   },
 
-
-    // // console.log( await APP_UTIL.fireStoreSimple.get('posts/intro-to-firestore') )
-    // console.log( await APP_UTIL.fireStoreSimple.get('kv/important-phone-numbers') )
-    // // console.log( await APP_UTIL.fireStoreSimple.set('kv/important-phone-numbers', {
-    // //   list: [
-    // //     {
-    // //       number: 911,
-    // //       category: 'Police',
-    // //       t: +new Date
-    // //     }
-    // //   ]
-    // // }) )
-
-    // console.log( await APP_UTIL.fireStoreSimple.update('kv/important-phone-numbers', {
-    //   add: 12
-    // }) )
-
   async httpGet( req, res )
   {
     let data = await APP_UTIL.fireStoreSimple.get('kv/important-phone-numbers')
