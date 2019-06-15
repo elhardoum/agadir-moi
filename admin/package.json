@@ -15,6 +15,7 @@
     "bcryptjs": "^2.4.3",
     "cookies": "^0.7.3",
     "finalhandler": "^1.1.1",
+    "firebase-admin": "^8.1.0",
     "jsonwebtoken": "^8.5.1",
     "nodemailer": "^6.1.1",
     "pg": "^7.10.0",
