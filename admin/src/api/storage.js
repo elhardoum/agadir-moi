@@ -44,6 +44,8 @@ module.exports = {
     if ( ! buffer )
       return res.sendJSON({ success: false })
 
+    await new Promise(res => setTimeout(res, 20000))
+
     try {
       const admin = require('firebase-admin')
 
@@ -58,7 +60,7 @@ module.exports = {
           , upload = bucket.file(_filename)
           , blobStream = upload.createWriteStream({
             metadata: {
-              contentType: `image/${contentType.split('/').pop()}`,
+              contentType: `image/${contentType.split('/').pop()||'png'}`,
               metadata: {
                 firebaseStorageDownloadTokens: process.env.STORAGE_IMAGES_DOWNLOAD_TOKEN,
               }
@@ -81,7 +83,7 @@ module.exports = {
         blobStream.end(buffer)
       })
 
-      return res.sendJSON({success: true, url})
+      return this.httpGet(req, res)
     } catch (e)
     {
       // pass
@@ -109,24 +111,49 @@ module.exports = {
       files.map(list => list.map(file => items.push({
         access_url: `https://firebasestorage.googleapis.com/v0/b/${file.bucket.name}/o/${encodeURIComponent(file.name)}?alt=media&token=${(file.metadata.metadata||{}).firebaseStorageDownloadTokens}`,
         id: file.id,
-        name: path.basename(file.name),
+        name: path.basename(file.name).replace(/^\d+\./g, ''),
+        timeCreated: +new Date(file.metadata.timeCreated),
       })))
 
-      console.log(items)
-
-      // for ( let i=0; i < files.length; i++ ) {
-      //   console.log(
-      //     files[i][0].metadata.selfLink,
-      //     admin.refFromURL(files[i][0].metadata.selfLink)
-      //   )
-      // }
-
+      return res.sendJSON(items.sort((a,b) => b.timeCreated-a.timeCreated))
     } catch (e)
     {
-      console.log('err', e)
+      console.log('err getting files', e)
       // pass
     }
 
-    return res.sendJSON({ success: false })
+    return res.sendJSON(null, 500)
+  },
+
+  async httpDelete(req, res)
+  {
+    let { id: ids } = req.parsedQuery
+    ids = (Array.isArray(ids) ? ids : [ids]).map(id => decodeURIComponent(id)).filter(Boolean)
+
+    try {
+      const admin = require('firebase-admin')
+
+      admin.apps.length || admin.initializeApp({
+        credential: admin.credential.cert(require(process.env.GOOGLE_APPLICATION_CREDENTIALS)),
+        storageBucket: 'agadir-et-moi.appspot.com'
+      })
+
+      const bucket = admin.storage().bucket()
+
+      for ( let i=0; i<ids.length; i++ ) {
+        try {
+          let file = await bucket.file(ids[i])
+          await file.delete()
+        } catch(e) {}
+      }
+
+      return this.httpGet(req, res)
+    } catch (e)
+    {
+      console.log('err deleting files', e)
+      // pass
+    }
+
+    return res.sendJSON(null, 500)
   }
 }

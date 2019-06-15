@@ -250,3 +250,30 @@ html {
 .font-mono {
     font-family: monospace
 }
+
+@keyframes flickerAnimation {
+  0%   { opacity:.4; }
+  50%  { opacity:.75; }
+  100% { opacity:.4; }
+}
+@-o-keyframes flickerAnimation{
+  0%   { opacity:.4; }
+  50%  { opacity:.75; }
+  100% { opacity:.4; }
+}
+@-moz-keyframes flickerAnimation{
+  0%   { opacity:.4; }
+  50%  { opacity:.75; }
+  100% { opacity:.4; }
+}
+@-webkit-keyframes flickerAnimation{
+  0%   { opacity:.4; }
+  50%  { opacity:.75; }
+  100% { opacity:.4; }
+}
+.animate-flicker {
+   -webkit-animation: flickerAnimation 2.5s infinite;
+   -moz-animation: flickerAnimation 2.5s infinite;
+   -o-animation: flickerAnimation 2.5s infinite;
+    animation: flickerAnimation 2.5s infinite;
+}
