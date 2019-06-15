@@ -44,8 +44,6 @@ module.exports = {
     if ( ! buffer )
       return res.sendJSON({ success: false })
 
-    await new Promise(res => setTimeout(res, 20000))
-
     try {
       const admin = require('firebase-admin')
 

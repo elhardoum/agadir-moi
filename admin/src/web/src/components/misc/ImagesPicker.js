@@ -20,7 +20,18 @@ export default class ImagesPicker extends Component
 
     list || fetch('/api/storage/images')
       .then(res => res.json())
-      .then(list => Array.isArray(list) && this.props.setGlobalState({'storage/images': list}))
+      .then(list => Array.isArray(list) && (list =>
+      {
+        this.props.setGlobalState({'storage/images': list})
+
+        let { selectedIds, onUpdateSelection } = this.props
+          , { selected=[] } = this.state
+
+        // validate preloaded selection from storage items
+        selectedIds && selected.length && this.setState({ selected: selected.filter(id => list.find(item => item.id === id)) }, _ =>
+          onUpdateSelection && this.state.selected.length !== selectedIds.length
+            && onUpdateSelection(this.state.selected))
+      })(list))
       .catch(e => 1)
 
     this.props.selectedIds && this.setState({ selected: this.props.selectedIds })
@@ -172,7 +183,7 @@ export default class ImagesPicker extends Component
       return true
 
     let strip = str => str.toLowerCase().replace(/[^a-zA-Z0-9]/g, '')
-      , bucket = `${strip(item.id)} ${strip(item.name)} ${(new Date(item.timeCreated||+new Date)).toLocaleDateString()}`
+      , bucket = `${strip(item.id)} ${strip(item.name)} ${(new Date(item.timeCreated||+new Date)).toLocaleString()}`
 
     return strip(bucket).indexOf(strip(filter)) >= 0
   }
@@ -193,10 +204,11 @@ export default class ImagesPicker extends Component
     const uploaded_files = this.props.getGlobalState('storage/images')
         , { uploads=[], show_all=true, selected=[] } = this.state
         , files = uploads.concat(uploaded_files||[])
+        , files_filtered = files.filter(item => this.showItemShow(item))
 
     return (
       <div>
-        <div className="bg-white border-grey p-2 text-sm w-full" style={{ maxHeight: this.props.maxHeight || 250, overflowY: 'scroll' }}>
+        <div className="bg-white border-grey p-2 text-sm w-full">
           { undefined === uploaded_files ? <div className="select-none w-full">
             <div className="flex h-16 items-center w-full">
               <Loading {...this.props} className="w-full" />
@@ -209,8 +221,8 @@ export default class ImagesPicker extends Component
               <span onClick={e => this.setState({ show_all: !show_all })} className="underline cursor-pointer">Show { show_all ? 'selected' : 'all' }</span>
             </div> }
 
-            { files.length ? <div className="flex flex-wrap flex-start">{
-              files.filter(item => this.showItemShow(item)).map((file,i) => <div key={file.id}>
+            { files_filtered.length ? <div className="flex flex-wrap flex-start" style={{ maxHeight: this.props.maxHeight || 250, overflowY: 'scroll' }}>{
+              files_filtered.map((file,i) => <div key={file.id}>
                 <div
                   style={{backgroundImage: `url(${file.access_url})`, minWidth: 150, maxWidth: 200 }}
                   className={`bg-cover bg-center inline-block h-32 rounded relative m-1${file.loading || this.state[`deleting_${file.id}`] ? ' animate-flicker' : ''}${selected.indexOf(file.id) >= 0 ? ' border-4 border-green' : ''}`}>
@@ -232,7 +244,9 @@ export default class ImagesPicker extends Component
                 </div>
               </div>)
             }</div> : <div className="flex h-16 items-center w-full">
-              <div className="table m-auto text-sm text-grey">You don't have any uploads yet.</div>
+              <div className="table m-auto text-sm text-grey">
+                { this.state.filter || !show_all ? 'No uploads have matched your filters.' : 'You don\'t have any uploads yet.' }
+              </div>
             </div> }
           </div> }
         </div>
