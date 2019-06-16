@@ -4,7 +4,7 @@
 - [x] Auth via JWT or cookie/crypt based login
 - [x] postgres for admin relational db needs
 - [x] user roles: super admin, admin, moderator
-- [ ] manage publications, post attachments to firebase
+- [x] post attachments to firebase
 - [ ] moderators can approve/dismiss complaints
 - [ ] admins can manage publications and complaints
 - [x] super admin has caps of normal admins, plus managing all user roles
@@ -15,6 +15,7 @@
 - [x] users CRUD
 - [x] important phone numbers CRUD
 - [ ] migrate some configs to dotenv
+- [ ] migrate firebase URIs to dotenv
 
 <!-- and more to come -->
 

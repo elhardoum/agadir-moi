@@ -214,7 +214,7 @@ export default class ImagesPicker extends Component
               <Loading {...this.props} className="w-full" />
             </div>
           </div> : <div className="select-none w-full">
-            { files.length && <div className="flex items-center text-grey-dark text-xs">
+            { files.length > 0 && <div className="flex items-center text-grey-dark text-xs">
               <input type="text" className="bg-grey-lighter block border border-grey-lighter focus:bg-white focus:border-blue-2 focus:outline-none mb-1 mr-2 px-2 py-2 rounded text-grey-darker text-xs"
                 placeholder="Filter..."
                 onChange={e => this.setState({ filter: e.target.value })} value={this.state.filter||''} />
@@ -226,11 +226,13 @@ export default class ImagesPicker extends Component
                 <div
                   style={{backgroundImage: `url(${file.access_url})`, minWidth: 150, maxWidth: 200 }}
                   className={`bg-cover bg-center inline-block h-32 rounded relative m-1${file.loading || this.state[`deleting_${file.id}`] ? ' animate-flicker' : ''}${selected.indexOf(file.id) >= 0 ? ' border-4 border-green' : ''}`}>
-                  <div className="h-full table w-full filename" onClick={e => e.target.classList.contains('item-delete-trigger') || this.toggleSelected(file)}>
+                  <div className="h-full table w-full filename" onClick={e => !e.target.classList.contains('item-delete-trigger') && 'A' !== e.target.tagName && this.toggleSelected(file)}>
                     <span className="align-bottom text-center table-cell">
                       <div className="text-xs text-white p-1" style={{backgroundColor: 'rgba(0, 0, 0, 0.58)'}}>
                         <div className="flex items-center">
-                          <span className="flex-1 mr-1" style={{ wordBreak: 'break-word' }}>{ file.name } / { (new Date( file.timeCreated )).toLocaleDateString() }</span>
+                          <span className="flex-1 mr-1" style={{ wordBreak: 'break-word' }}>
+                            <a href={ file.loading ? null : file.access_url } target="_blank" className="text-white">{ file.name }</a> / { (new Date( file.timeCreated )).toLocaleDateString() }
+                          </span>
                           <span
                             title="Delete upload"
                             onClick={e => this.onDelete(file)}

@@ -65,6 +65,13 @@ const http = require('http'), server = http.createServer(async (req, res) =>
       case 'DELETE storage/images':
         return require('./src/api/storage').http( request_name, req, res, default_callback )
 
+      case 'PUT news':
+      case 'POST news':
+      case 'PATCH news':
+      case 'GET news':
+      case 'DELETE news':
+        return require('./src/api/news').http( request_name, req, res, default_callback )
+
       default:
         return default_callback()
     }
