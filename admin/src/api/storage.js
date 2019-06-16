@@ -49,10 +49,7 @@ module.exports = {
 
       let _filename = `images/${+new Date}.${filename}`
 
-      admin.apps.length || admin.initializeApp({
-        credential: admin.credential.cert(require(process.env.GOOGLE_APPLICATION_CREDENTIALS)),
-        storageBucket: 'agadir-et-moi.appspot.com'
-      })
+      APP_UTIL.initFirebaseApp(admin)
 
       const bucket = admin.storage().bucket()
           , upload = bucket.file(_filename)
@@ -95,10 +92,7 @@ module.exports = {
     try {
       const admin = require('firebase-admin')
 
-      admin.apps.length || admin.initializeApp({
-        credential: admin.credential.cert(require(process.env.GOOGLE_APPLICATION_CREDENTIALS)),
-        storageBucket: 'agadir-et-moi.appspot.com'
-      })
+      APP_UTIL.initFirebaseApp(admin)
 
       const bucket = admin.storage().bucket(), files = await bucket.getFiles({
         directory: 'images'
@@ -131,10 +125,7 @@ module.exports = {
     try {
       const admin = require('firebase-admin')
 
-      admin.apps.length || admin.initializeApp({
-        credential: admin.credential.cert(require(process.env.GOOGLE_APPLICATION_CREDENTIALS)),
-        storageBucket: 'agadir-et-moi.appspot.com'
-      })
+      APP_UTIL.initFirebaseApp(admin)
 
       const bucket = admin.storage().bucket()
 

@@ -16,6 +16,9 @@ import ImportantPhoneNumbersEdit from './phones/edit'
 import Users from './users/'
 import UsersNew from './users/new'
 import UsersEdit from './users/edit'
+import News from './news/'
+import NewsNew from './news/new'
+import NewsEdit from './news/edit'
 
 import './../style.scss'
 
@@ -376,6 +379,13 @@ export default class Wrap extends Component
             && <Route exact path='/users/new' render={routerProps => renderProxy(<UsersNew {...routerProps} {...props} />, routerProps)} />}
           {user && (user.granted_roles||[]).indexOf('super-admin') >= 0
             && <Route exact path='/users/edit/:id' render={routerProps => renderProxy(<UsersEdit {...routerProps} {...props} />, routerProps)} />}
+
+          {user && (user.granted_roles||[]).join('').indexOf('admin') >= 0
+            && <Route exact path='/news' render={routerProps => renderProxy(<News {...routerProps} {...props} />, routerProps)} />}
+          {user && (user.granted_roles||[]).join('').indexOf('admin') >= 0
+            && <Route exact path='/news/new' render={routerProps => renderProxy(<NewsNew {...routerProps} {...props} />, routerProps)} />}
+          {user && (user.granted_roles||[]).join('').indexOf('admin') >= 0
+            && <Route exact path='/news/edit/:id' render={routerProps => renderProxy(<NewsEdit {...routerProps} {...props} />, routerProps)} />}
 
           <Route render={routerProps => renderProxy(<Error404 {...routerProps} {...props} />, routerProps)} />
         </Switch>

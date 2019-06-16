@@ -76,11 +76,11 @@ export default class UsersNew extends Component
       let res = await fetch('/api/users/manage', {
         method: 'PUT',
         body: (new URLSearchParams({
-          first_name: encodeURIComponent(first_name.trim()),
-          last_name: encodeURIComponent(last_name.trim()),
+          first_name: first_name.trim(),
+          last_name: last_name.trim(),
           email: email.trim(),
-          password: encodeURIComponent(password),
-          role: encodeURIComponent(role.trim()),
+          password: password,
+          role: role.trim(),
         })).toString(),
         headers: { 'Content-type': 'application/x-www-form-urlencoded' },
         signal: this.ABORT_CONTROLLER.signal

@@ -18,23 +18,30 @@ export default class ImagesPicker extends Component
   {
     const list = this.props.getGlobalState('storage/images')
 
-    list || fetch('/api/storage/images')
+    list ? this.componentWillReceiveProps() : fetch('/api/storage/images')
       .then(res => res.json())
-      .then(list => Array.isArray(list) && (list =>
-      {
-        this.props.setGlobalState({'storage/images': list})
-
-        let { selectedIds, onUpdateSelection } = this.props
-          , { selected=[] } = this.state
-
-        // validate preloaded selection from storage items
-        selectedIds && selected.length && this.setState({ selected: selected.filter(id => list.find(item => item.id === id)) }, _ =>
-          onUpdateSelection && this.state.selected.length !== selectedIds.length
-            && onUpdateSelection(this.state.selected))
-      })(list))
+      .then(list => Array.isArray(list) && (this.props.setGlobalState({'storage/images': list}), this.validatePropsSelection()))
       .catch(e => 1)
+  }
 
+  componentWillReceiveProps()
+  {
     this.props.selectedIds && this.setState({ selected: this.props.selectedIds })
+    this.validatePropsSelection()
+  }
+
+  validatePropsSelection()
+  {
+    const list = this.props.getGlobalState('storage/images')
+
+    if ( ! list )
+      return
+
+    let { selectedIds, onUpdateSelection } = this.props, { selected=[] } = this.state
+
+    // validate preloaded selection from storage items
+    selectedIds && selected.length && this.setState({ selected: selected.filter(id => list.find(item => item.id === id)) }, _ =>
+      onUpdateSelection && this.state.selected.length !== selectedIds.length && onUpdateSelection(this.state.selected))
   }
 
   uploaderClick(e)

@@ -10,7 +10,7 @@
 - [x] super admin has caps of normal admins, plus managing all user roles
 - [ ] notifications preference for mods
 - [ ] Safari auth issue
-- [ ] news CRUD
+- [x] news CRUD
 - [ ] events CRUD
 - [x] users CRUD
 - [x] important phone numbers CRUD

@@ -2,8 +2,6 @@ import React, { Component } from 'react'
 import { title } from './../../helpers'
 import { Link } from 'react-router-dom'
 
-import ImagesPicker from './ImagesPicker'
-
 export default class Home extends Component
 {
   componentDidMount()
@@ -17,12 +15,6 @@ export default class Home extends Component
     return (
       <div className="m-auto table">
         <div className="w-full max-w-md m-auto px-3">
-
-          <ImagesPicker {...this.props}
-            onUpdateSelection={e => console.log('update selection', e)}
-            selectedIds={["images%2F1560628201015._20180504_172058.JPG"]}
-            /><div className="mt-5"></div>
-
           <h3 className="text-grey-darker uppercase tracking-wide">Welcome, { [user.first_name, user.last_name].filter(Boolean).join(' ') || 'User' }!</h3>
           <p className="mt-5 text-grey-darker">Welcome to your Agadir & Moi administration dashboard!</p>
 

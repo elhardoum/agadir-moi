@@ -119,4 +119,13 @@ module.exports = {
       } catch(e) { /* pass */ }
     }
   },
+
+  initFirebaseApp(admin)
+  {
+    admin.apps.length || admin.initializeApp({
+      credential: admin.credential.cert(require(process.env.GOOGLE_APPLICATION_CREDENTIALS)),
+      storageBucket: 'agadir-et-moi.appspot.com',
+      databaseURL: 'https://agadir-et-moi.firebaseio.com',
+    })
+  }
 }

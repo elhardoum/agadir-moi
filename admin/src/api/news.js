@@ -17,6 +17,12 @@ module.exports = {
         case 'DELETE news':
           return this.httpDelete( req, res )
 
+        case 'GET news/categories':
+          return this.httpGetCategories( req, res )
+
+        case 'GET news/item':
+          return this.httpGetItem( req, res )
+
         default: return default_callback()
       }
     })
@@ -51,10 +57,7 @@ module.exports = {
     }
 
     const admin = require('firebase-admin')
-    admin.apps.length || admin.initializeApp({
-      credential: admin.credential.cert(require(process.env.GOOGLE_APPLICATION_CREDENTIALS)),
-      databaseURL: 'https://agadir-et-moi.firebaseio.com'
-    })
+    APP_UTIL.initFirebaseApp(admin)
 
     try {
       const id = 1560678706449 - (+new Date - 1560678706449) // hacks, sorry. valid for ~50 years
@@ -63,7 +66,7 @@ module.exports = {
       await ref.child(`news/${id}`).set({
         id, title, content, timeCreated: +new Date,
         ...(category && { category }),
-        ...(images && {images: images.map(decodeURIComponent)}),
+        ...(images && {images: (Array.isArray(images)?images:[images]).map(decodeURIComponent)}),
       })
 
       return res.sendJSON({success: true, id})
@@ -74,20 +77,19 @@ module.exports = {
 
   async httpGet( req, res )
   {
-    let { start_at, limit=10 } = req.parsedQuery
+    let { start_at, limit } = req.parsedQuery
 
     const admin = require('firebase-admin')
-    admin.apps.length || admin.initializeApp({
-      credential: admin.credential.cert(require(process.env.GOOGLE_APPLICATION_CREDENTIALS)),
-      databaseURL: 'https://agadir-et-moi.firebaseio.com'
-    })
+    APP_UTIL.initFirebaseApp(admin)
 
     try {
-      let ref = admin.database().ref('posts/news').orderByKey().limitToFirst((+limit||10)+1)
+      limit = +limit||(process.env.POSTS_ITEMS_PER_PAGE||4)
+      let ref = admin.database().ref('posts/news').orderByKey().limitToFirst(limit+1)
       start_at && (ref=ref.startAt(String(start_at)))
 
       let data = (await new Promise(res => ref.once('value', snap => res(snap.val()))))||{}
         , next_cursor = Object.keys(data).length > limit ? Object.keys(data).pop() : null
+        , previous_cursor = null
 
       for ( let id in data ) {
         data[id] = {
@@ -103,7 +105,21 @@ module.exports = {
 
       next_cursor && (delete data[next_cursor])
 
-      return res.sendJSON({ data: Object.values(data), next_cursor })
+      if ( start_at ) {
+        try {
+          let ref = admin.database().ref('posts/news').orderByKey()
+            , keys = (await new Promise(res => ref.once('value', snap => res(snap.val()))))||{}
+            , ids = Object.keys(keys||{})
+            , first_id = Object.keys(data)[0]
+
+          if ( ids.length ) {
+            let previous_items = ids.slice(0, ids.indexOf(first_id)).reverse().slice(0,limit).reverse()
+            previous_items.length && (previous_cursor=previous_items[0])
+          }
+        } catch(e) {}
+      }
+
+      return res.sendJSON({ items: Object.values(data), previous_cursor, next_cursor })
     } catch (e) {}
 
     return res.sendJSON(null, 500)
@@ -122,10 +138,7 @@ module.exports = {
     }
 
     const admin = require('firebase-admin')
-    admin.apps.length || admin.initializeApp({
-      credential: admin.credential.cert(require(process.env.GOOGLE_APPLICATION_CREDENTIALS)),
-      databaseURL: 'https://agadir-et-moi.firebaseio.com'
-    })
+    APP_UTIL.initFirebaseApp(admin)
 
     try {
       db = admin.database()
@@ -176,10 +189,7 @@ module.exports = {
       return res.sendJSON({success: true})
 
     const admin = require('firebase-admin')
-    admin.apps.length || admin.initializeApp({
-      credential: admin.credential.cert(require(process.env.GOOGLE_APPLICATION_CREDENTIALS)),
-      databaseURL: 'https://agadir-et-moi.firebaseio.com'
-    })
+    APP_UTIL.initFirebaseApp(admin)
 
     const db = admin.database(), deletes = []
 
@@ -200,5 +210,41 @@ module.exports = {
     }
 
     return res.sendJSON({success: false})
+  },
+
+  async httpGetCategories( req, res )
+  {
+    const admin = require('firebase-admin')
+    APP_UTIL.initFirebaseApp(admin)
+
+    try {
+      let ref = admin.database().ref('posts/news').orderByKey()
+        , data = (await new Promise(res => ref.once('value', snap => res(snap.val()))))||{}
+      return res.sendJSON([...new Set(Object.keys(data||{}).map(k => data[k].category).filter(Boolean))])
+    } catch(e) {}
+
+    return res.sendJSON([])
+  },
+
+  async httpGetItem( req, res )
+  {
+    const { id } = req.parsedQuery
+
+    if ( ! id || ! /^\d+$/.test(+id) )
+      return res.sendJSON(null, 404)
+
+    const admin = require('firebase-admin')
+    APP_UTIL.initFirebaseApp(admin)
+
+    // await new Promise(res => setTimeout(res, 15000, 1))
+
+    try {
+      let ref = admin.database().ref(`posts/news/${id}`)
+        , data = (await new Promise(res => ref.once('value', snap => res(snap.val()))))||{}
+
+      return res.sendJSON( data, data && data.id ? 200 : 404 )
+    } catch(e) {}
+
+    return res.sendJSON([])
   },
 }
