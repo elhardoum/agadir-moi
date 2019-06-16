@@ -1,32 +1,38 @@
-module.exports = {
+module.exports = class news
+{
+  constructor()
+  {
+    this.collectionId = 'news'
+  }
+
   http( slug, req, res, default_callback )
   {
     this.permissionsCheck(req, res, _ =>
     {
       switch ( slug ) {
-        case 'PUT news':
-        case 'POST news':
+        case `PUT ${this.collectionId}`:
+        case `POST ${this.collectionId}`:
           return this.httpPut( req, res )
 
-        case 'PATCH news':
+        case `PATCH ${this.collectionId}`:
           return this.httpUpdate( req, res )
 
-        case 'GET news':
+        case `GET ${this.collectionId}`:
           return this.httpGet( req, res )
 
-        case 'DELETE news':
+        case `DELETE ${this.collectionId}`:
           return this.httpDelete( req, res )
 
-        case 'GET news/categories':
+        case `GET ${this.collectionId}/categories`:
           return this.httpGetCategories( req, res )
 
-        case 'GET news/item':
+        case `GET ${this.collectionId}/item`:
           return this.httpGetItem( req, res )
 
         default: return default_callback()
       }
     })
-  },
+  }
 
   async permissionsCheck( req, res, then )
   {
@@ -36,7 +42,12 @@ module.exports = {
       return then(req, res)
 
     return res.sendJSON(null, 403)
-  },
+  }
+
+  uid()
+  {
+    return 1560678706449 - (+new Date - 1560678706449) // hacks, sorry. valid for ~50 years
+  }
 
   async httpPut( req, res )
   {
@@ -56,14 +67,12 @@ module.exports = {
       return res.sendJSON({ success: false, errors })
     }
 
-    const admin = require('firebase-admin')
-    APP_UTIL.initFirebaseApp(admin)
+    const admin = APP_UTIL.initFirebaseApp()
 
     try {
-      const id = 1560678706449 - (+new Date - 1560678706449) // hacks, sorry. valid for ~50 years
-          , db = admin.database(), ref = db.ref('posts')
+      const id = this.uid(), db = admin.database(), ref = db.ref('posts')
 
-      await ref.child(`news/${id}`).set({
+      await ref.child(`${this.collectionId}/${id}`).set({
         id, title, content, timeCreated: +new Date,
         ...(category && { category }),
         ...(images && {images: (Array.isArray(images)?images:[images]).map(decodeURIComponent)}),
@@ -73,18 +82,17 @@ module.exports = {
     } catch (e) {}
 
     return res.sendJSON({success: false})
-  },
+  }
 
   async httpGet( req, res )
   {
     let { start_at, limit } = req.parsedQuery
 
-    const admin = require('firebase-admin')
-    APP_UTIL.initFirebaseApp(admin)
+    const admin = APP_UTIL.initFirebaseApp()
 
     try {
-      limit = +limit||(process.env.POSTS_ITEMS_PER_PAGE||4)
-      let ref = admin.database().ref('posts/news').orderByKey().limitToFirst(limit+1)
+      limit = +limit||(process.env.POSTS_ITEMS_PER_PAGE||10)
+      let ref = admin.database().ref(`posts/${this.collectionId}`).orderByKey().limitToFirst(limit+1)
       start_at && (ref=ref.startAt(String(start_at)))
 
       let data = (await new Promise(res => ref.once('value', snap => res(snap.val()))))||{}
@@ -107,7 +115,7 @@ module.exports = {
 
       if ( start_at ) {
         try {
-          let ref = admin.database().ref('posts/news').orderByKey()
+          let ref = admin.database().ref(`posts/${this.collectionId}`).orderByKey()
             , keys = (await new Promise(res => ref.once('value', snap => res(snap.val()))))||{}
             , ids = Object.keys(keys||{})
             , first_id = Object.keys(data)[0]
@@ -123,7 +131,7 @@ module.exports = {
     } catch (e) {}
 
     return res.sendJSON(null, 500)
-  },
+  }
 
   async httpUpdate( req, res )
   {
@@ -132,17 +140,16 @@ module.exports = {
     let errors = [], post, db, postRef
 
     if ( ! id || ! /^\d+$/.test(+id) ) {
-      errors.push({field: 'title', error: 'Please choose a title for this news item.'})
+      errors.push({field: 'general', error: 'Error, request missing post ID.'})
     } else {
       id = +id
     }
 
-    const admin = require('firebase-admin')
-    APP_UTIL.initFirebaseApp(admin)
+    const admin = APP_UTIL.initFirebaseApp()
 
     try {
       db = admin.database()
-      postRef = db.ref(`posts/news/${id}`)
+      postRef = db.ref(`posts/${this.collectionId}/${id}`)
       post = (await new Promise(res => postRef.once('value', snap => res(snap.val()))))||{}
     } catch (e) {}
 
@@ -162,7 +169,7 @@ module.exports = {
     }
 
     try {
-      const updateRef = db.ref(`posts/news/${id}`)
+      const updateRef = db.ref(`posts/${this.collectionId}/${id}`)
 
       images = undefined !== images ? (Array.isArray(images)?images:[images]).map(decodeURIComponent).filter(Boolean) : undefined
 
@@ -178,7 +185,7 @@ module.exports = {
     } catch (e) {}
 
     return res.sendJSON({success: false})
-  },
+  }
 
   async httpDelete( req, res )
   {
@@ -188,14 +195,13 @@ module.exports = {
     if ( ids.length == 0 )
       return res.sendJSON({success: true})
 
-    const admin = require('firebase-admin')
-    APP_UTIL.initFirebaseApp(admin)
+    const admin = APP_UTIL.initFirebaseApp()
 
     const db = admin.database(), deletes = []
 
     for ( let i=0; i<ids.length; i++ ) {
       try {
-        let ref = db.ref(`posts/news/${ids[i]}`)
+        let ref = db.ref(`posts/${this.collectionId}/${ids[i]}`)
         deletes.push(new Promise(res => ref.once('value', snap => res(snap.val()))))
         ref.remove()
       } catch (e) {}
@@ -210,21 +216,20 @@ module.exports = {
     }
 
     return res.sendJSON({success: false})
-  },
+  }
 
   async httpGetCategories( req, res )
   {
-    const admin = require('firebase-admin')
-    APP_UTIL.initFirebaseApp(admin)
+    const admin = APP_UTIL.initFirebaseApp()
 
     try {
-      let ref = admin.database().ref('posts/news').orderByKey()
+      let ref = admin.database().ref(`posts/${this.collectionId}`).orderByKey()
         , data = (await new Promise(res => ref.once('value', snap => res(snap.val()))))||{}
       return res.sendJSON([...new Set(Object.keys(data||{}).map(k => data[k].category).filter(Boolean))])
     } catch(e) {}
 
     return res.sendJSON([])
-  },
+  }
 
   async httpGetItem( req, res )
   {
@@ -233,18 +238,15 @@ module.exports = {
     if ( ! id || ! /^\d+$/.test(+id) )
       return res.sendJSON(null, 404)
 
-    const admin = require('firebase-admin')
-    APP_UTIL.initFirebaseApp(admin)
-
-    // await new Promise(res => setTimeout(res, 15000, 1))
+    const admin = APP_UTIL.initFirebaseApp()
 
     try {
-      let ref = admin.database().ref(`posts/news/${id}`)
+      let ref = admin.database().ref(`posts/${this.collectionId}/${id}`)
         , data = (await new Promise(res => ref.once('value', snap => res(snap.val()))))||{}
 
       return res.sendJSON( data, data && data.id ? 200 : 404 )
     } catch(e) {}
 
     return res.sendJSON([])
-  },
+  }
 }

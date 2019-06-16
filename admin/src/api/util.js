@@ -120,12 +120,14 @@ module.exports = {
     }
   },
 
-  initFirebaseApp(admin)
+  initFirebaseApp()
   {
+    const admin = require('firebase-admin')
     admin.apps.length || admin.initializeApp({
       credential: admin.credential.cert(require(process.env.GOOGLE_APPLICATION_CREDENTIALS)),
       storageBucket: 'agadir-et-moi.appspot.com',
       databaseURL: 'https://agadir-et-moi.firebaseio.com',
     })
+    return admin
   }
 }

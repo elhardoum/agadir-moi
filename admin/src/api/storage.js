@@ -45,11 +45,9 @@ module.exports = {
       return res.sendJSON({ success: false })
 
     try {
-      const admin = require('firebase-admin')
-
       let _filename = `images/${+new Date}.${filename}`
 
-      APP_UTIL.initFirebaseApp(admin)
+      const admin = APP_UTIL.initFirebaseApp()
 
       const bucket = admin.storage().bucket()
           , upload = bucket.file(_filename)
@@ -90,9 +88,7 @@ module.exports = {
   async httpGet(req, res)
   {
     try {
-      const admin = require('firebase-admin')
-
-      APP_UTIL.initFirebaseApp(admin)
+      const admin = APP_UTIL.initFirebaseApp()
 
       const bucket = admin.storage().bucket(), files = await bucket.getFiles({
         directory: 'images'
@@ -123,9 +119,7 @@ module.exports = {
     ids = (Array.isArray(ids) ? ids : [ids]).map(id => decodeURIComponent(id)).filter(Boolean)
 
     try {
-      const admin = require('firebase-admin')
-
-      APP_UTIL.initFirebaseApp(admin)
+      const admin = APP_UTIL.initFirebaseApp()
 
       const bucket = admin.storage().bucket()
 

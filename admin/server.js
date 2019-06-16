@@ -72,7 +72,18 @@ const http = require('http'), server = http.createServer(async (req, res) =>
       case 'DELETE news':
       case 'GET news/categories':
       case 'GET news/item':
-        return require('./src/api/news').http( request_name, req, res, default_callback )
+        const news = require('./src/api/news')
+        return (new news).http( request_name, req, res, default_callback )
+
+      case 'PUT events':
+      case 'POST events':
+      case 'PATCH events':
+      case 'GET events':
+      case 'DELETE events':
+      case 'GET events/categories':
+      case 'GET events/item':
+        const events = require('./src/api/events')
+        return (new events).http( request_name, req, res, default_callback )
 
       default:
         return default_callback()

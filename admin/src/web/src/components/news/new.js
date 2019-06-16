@@ -143,7 +143,7 @@ export default class NewsNew extends Component
             { errors.category.length ? <p className="text-red text-xs italic">{ errors.category.map((e,k) => <span className="table" key={k}>{e}</span>) }</p> : '' }
 
             <div className="mt-6">
-              <label className="block uppercase tracking-wide text-grey-darker text-xs font-bold mb-2" htmlFor="grid-group">Content</label>
+              <label className="block uppercase tracking-wide text-grey-darker text-xs font-bold mb-2" htmlFor="grid-content">Content</label>
               <textarea
                 onChange={e => this.setState({content: e.target.value})}
                 ref={this._REFS[1]}

@@ -19,6 +19,9 @@ import UsersEdit from './users/edit'
 import News from './news/'
 import NewsNew from './news/new'
 import NewsEdit from './news/edit'
+import Events from './events/'
+import EventsNew from './events/new'
+import EventsEdit from './events/edit'
 
 import './../style.scss'
 
@@ -283,15 +286,6 @@ export default class Wrap extends Component
               </div>
             </li> }
 
-            <li className="nav-item block">
-              <Link to='/settings' className="flex items-center" onClick={e => this.maybeCloseMenu()}>
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M10 0C4.47581 0 0 4.47581 0 10C0 15.5242 4.47581 20 10 20C15.5242 20 20 15.5242 20 10C20 4.47581 15.5242 0 10 0ZM10 3.87097C11.9597 3.87097 13.5484 5.45968 13.5484 7.41935C13.5484 9.37903 11.9597 10.9677 10 10.9677C8.04032 10.9677 6.45161 9.37903 6.45161 7.41935C6.45161 5.45968 8.04032 3.87097 10 3.87097ZM10 17.7419C7.63306 17.7419 5.5121 16.6694 4.09274 14.9919C4.85081 13.5645 6.33468 12.5806 8.06452 12.5806C8.16129 12.5806 8.25806 12.5968 8.35081 12.625C8.875 12.7944 9.42339 12.9032 10 12.9032C10.5766 12.9032 11.129 12.7944 11.6492 12.625C11.7419 12.5968 11.8387 12.5806 11.9355 12.5806C13.6653 12.5806 15.1492 13.5645 15.9073 14.9919C14.4879 16.6694 12.3669 17.7419 10 17.7419Z" fill="white"></path>
-                </svg>
-                <span className="ml-2">Settings</span>
-              </Link>
-            </li>
-
             <li className="nav-item block has-child">
               <Link to={ user && user.id ? '/account' : '/login?next=%2Faccount' } className="flex items-center" onClick={e => this.maybeCloseMenu()}>
                 { user && user.gravatar ? <img src={user.gravatar} className="align-middle rounded-full" width="20" height="20" /> : <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -307,14 +301,6 @@ export default class Wrap extends Component
 
               <div className="subnav">
                 { user && user.id ? <ul className="list-reset">
-                  <li>
-                    <Link to='/account' className="flex items-center" onClick={e => (hideSubnav(), this.maybeCloseMenu())}>
-                      <svg className="inline" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M10 0C4.47581 0 0 4.47581 0 10C0 15.5242 4.47581 20 10 20C15.5242 20 20 15.5242 20 10C20 4.47581 15.5242 0 10 0ZM10 3.87097C11.9597 3.87097 13.5484 5.45968 13.5484 7.41935C13.5484 9.37903 11.9597 10.9677 10 10.9677C8.04032 10.9677 6.45161 9.37903 6.45161 7.41935C6.45161 5.45968 8.04032 3.87097 10 3.87097ZM10 17.7419C7.63306 17.7419 5.5121 16.6694 4.09274 14.9919C4.85081 13.5645 6.33468 12.5806 8.06452 12.5806C8.16129 12.5806 8.25806 12.5968 8.35081 12.625C8.875 12.7944 9.42339 12.9032 10 12.9032C10.5766 12.9032 11.129 12.7944 11.6492 12.625C11.7419 12.5968 11.8387 12.5806 11.9355 12.5806C13.6653 12.5806 15.1492 13.5645 15.9073 14.9919C14.4879 16.6694 12.3669 17.7419 10 17.7419Z" fill="white"/>
-                      </svg>
-                      <span className="ml-2">My Account</span>
-                    </Link>
-                  </li>
                   <li>
                     <Link to='/account/settings' className="flex items-center" onClick={e => (hideSubnav(), this.maybeCloseMenu())}>
                       <svg className="inline" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -386,6 +372,13 @@ export default class Wrap extends Component
             && <Route exact path='/news/new' render={routerProps => renderProxy(<NewsNew {...routerProps} {...props} />, routerProps)} />}
           {user && (user.granted_roles||[]).join('').indexOf('admin') >= 0
             && <Route exact path='/news/edit/:id' render={routerProps => renderProxy(<NewsEdit {...routerProps} {...props} />, routerProps)} />}
+
+          {user && (user.granted_roles||[]).join('').indexOf('admin') >= 0
+            && <Route exact path='/events' render={routerProps => renderProxy(<Events {...routerProps} {...props} />, routerProps)} />}
+          {user && (user.granted_roles||[]).join('').indexOf('admin') >= 0
+            && <Route exact path='/events/new' render={routerProps => renderProxy(<EventsNew {...routerProps} {...props} />, routerProps)} />}
+          {user && (user.granted_roles||[]).join('').indexOf('admin') >= 0
+            && <Route exact path='/events/edit/:id' render={routerProps => renderProxy(<EventsEdit {...routerProps} {...props} />, routerProps)} />}
 
           <Route render={routerProps => renderProxy(<Error404 {...routerProps} {...props} />, routerProps)} />
         </Switch>
