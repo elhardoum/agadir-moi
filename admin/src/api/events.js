@@ -152,4 +152,19 @@ module.exports = class events extends news
 
     return res.sendJSON({success: false})
   }
+
+  parseItemData(data)
+  {
+    return {
+      id: data.id,
+      title: data.title,
+      content: data.content,
+      category: data.category,
+      location: data.location,
+      timeCreated: data.timeCreated,
+      ...( data.timeUpdated && {timeUpdated: data.timeUpdated} ),
+      ...( data.images && {images: data.images} ),
+      ...( data.dates && {dates: data.dates} ),
+    }
+  }
 }

@@ -77,6 +77,7 @@ export default class Events extends Component
                 <tr className="border-b border-grey-light">
                   <th className="py-2">Title</th>
                   <th className="py-2">Category</th>
+                  <th className="py-2">Location</th>
                   <th className="py-2">Date</th>
                   <th className="py-2">Actions</th>
                 </tr>
@@ -85,6 +86,7 @@ export default class Events extends Component
                 { items.map((item,i) => <tr className="border-b border-grey-light" key={i}>
                   <td className="py-2">{ item.title }</td>
                   <td className="py-2">{ item.category || 'N/A' }</td>
+                  <td className="py-2">{ item.location || 'N/A' }</td>
                   <td className="py-2 text-xs">
                     <span className="table" title={(new Date(item.timeCreated)).toLocaleString()}>Created { (new Date(item.timeCreated)).toLocaleDateString() }</span>
                     { !!item.timeUpdated && <span className="table" title={(new Date(item.timeUpdated)).toLocaleString()}>Updated { (new Date(item.timeUpdated)).toLocaleDateString() }</span> }

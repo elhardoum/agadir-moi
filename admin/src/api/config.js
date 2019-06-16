@@ -1,14 +1,12 @@
-const LIVE_MODE = false
-
 module.exports = {
   PG_CONNECTION_URI: {
-    password: 'agadirmoi',
-    user: 'agadirmoi',
-    database: 'agadirmoi',
-    host: 'postgres',
+    password: process.env.POSTGRES_PASSWORD,
+    user: process.env.POSTGRES_USER,
+    database: process.env.POSTGRES_DATABASE,
+    host: process.env.POSTGRES_HOST,
   },
 
-  SITE_URL: 'http://localhost:9090/',
+  SITE_URL: process.env.SITE_URL,
 
   COOKIES_SALT: ';*Ks|}6Z^J{v?FI;~*J&G{HfZ5Z1+iG5(pCVN!/)>B*7O.67u=h&',
 

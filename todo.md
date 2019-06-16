@@ -13,9 +13,9 @@
 - [x] events CRUD
 - [x] users CRUD
 - [x] important phone numbers CRUD
-- [ ] migrate some configs to dotenv
-- [ ] migrate firebase URIs to dotenv
-- [ ] events - add event-related data to index table
+- [x] migrate some configs to dotenv
+- [x] migrate firebase URIs to dotenv
+- [ ] posts - persist ids raw list in memory for NoSQL pagination
 
 <!-- and more to come -->
 

@@ -43,10 +43,6 @@ export default class Home extends Component
               <Link className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker cursor-pointer" to="/users">Manage Users</Link>
             </li> }
 
-            { user.granted_roles.indexOf('super-admin') >= 0 && <li>
-              <Link className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker cursor-pointer" to="/settings">Misc Settings</Link>
-            </li> }
-
             <li>
               <Link className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker cursor-pointer" to="/logout">Sign Out</Link>
             </li>

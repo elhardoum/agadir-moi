@@ -125,8 +125,8 @@ module.exports = {
     const admin = require('firebase-admin')
     admin.apps.length || admin.initializeApp({
       credential: admin.credential.cert(require(process.env.GOOGLE_APPLICATION_CREDENTIALS)),
-      storageBucket: 'agadir-et-moi.appspot.com',
-      databaseURL: 'https://agadir-et-moi.firebaseio.com',
+      storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+      databaseURL: process.env.FIREBASE_DATABASE_URL,
     })
     return admin
   }

@@ -84,6 +84,19 @@ module.exports = class news
     return res.sendJSON({success: false})
   }
 
+  parseItemData(data)
+  {
+    return {
+      id: data.id,
+      title: data.title,
+      content: data.content,
+      category: data.category,
+      timeCreated: data.timeCreated,
+      ...( data.timeUpdated && {timeUpdated: data.timeUpdated} ),
+      ...( data.images && {images: data.images} ),
+    }
+  }
+
   async httpGet( req, res )
   {
     let { start_at, limit } = req.parsedQuery
@@ -100,15 +113,7 @@ module.exports = class news
         , previous_cursor = null
 
       for ( let id in data ) {
-        data[id] = {
-          id: data[id].id,
-          title: data[id].title,
-          content: data[id].content,
-          category: data[id].category,
-          timeCreated: data[id].timeCreated,
-          ...( data[id].timeUpdated && {timeUpdated: data[id].timeUpdated} ),
-          ...( data[id].images && {images: data[id].images} ),
-        }
+        data[id] = this.parseItemData(data[id])
       }
 
       next_cursor && (delete data[next_cursor])
