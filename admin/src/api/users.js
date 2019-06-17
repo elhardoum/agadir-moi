@@ -68,15 +68,13 @@ module.exports = {
 
       user.gravatar = `https://www.gravatar.com/avatar/${require('crypto').createHash('md5').update(user.email).digest('hex')}?d=mp`
 
-      console.log(user.roles, user.roles)
-
       if ( user.roles.indexOf('super-admin') >= 0 ) {
-        user.granted_roles = APP_CONFIG.USER_ROLES
+        user.granted_roles = JSON.parse(JSON.stringify(APP_CONFIG.USER_ROLES))
       } else if ( user.roles.indexOf('admin') >= 0 ) {
-        user.granted_roles = APP_CONFIG.USER_ROLES
+        user.granted_roles = JSON.parse(JSON.stringify(APP_CONFIG.USER_ROLES))
         user.granted_roles.indexOf('super-admin') >= 0 && user.granted_roles.splice(user.granted_roles.indexOf('super-admin'), 1)
       } else if ( user.roles.indexOf('moderator') >= 0 ) {
-        user.granted_roles = APP_CONFIG.USER_ROLES
+        user.granted_roles = JSON.parse(JSON.stringify(APP_CONFIG.USER_ROLES))
         user.granted_roles.indexOf('super-admin') >= 0 && user.granted_roles.splice(user.granted_roles.indexOf('super-admin'), 1)
         user.granted_roles.indexOf('admin') >= 0 && user.granted_roles.splice(user.granted_roles.indexOf('admin'), 1)
       }
