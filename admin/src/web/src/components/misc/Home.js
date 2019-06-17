@@ -23,23 +23,23 @@ export default class Home extends Component
               <Link className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker cursor-pointer" to="/account/settings">My Profile</Link>
             </li>
 
-            { user.granted_roles.join('').indexOf('admin') >= 0 && <li>
+            { (user.granted_roles||[]).join('').indexOf('admin') >= 0 && <li>
               <Link className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker cursor-pointer" to="/news">Manage News</Link>
             </li> }
 
-            { user.granted_roles.join('').indexOf('admin') >= 0 && <li>
+            { (user.granted_roles||[]).join('').indexOf('admin') >= 0 && <li>
               <Link className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker cursor-pointer" to="/important-phone-numbers">Manage Important Phone Numbers</Link>
             </li> }
 
-            { user.granted_roles.join('').indexOf('admin') >= 0 && <li>
+            { (user.granted_roles||[]).join('').indexOf('admin') >= 0 && <li>
               <Link className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker cursor-pointer" to="/events">Manage Events</Link>
             </li> }
 
-            { user.granted_roles.indexOf('moderator') >= 0 && <li>
+            { (user.granted_roles||[]).indexOf('moderator') >= 0 && <li>
               <Link className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker cursor-pointer" to="/complaints">Manage Complaints</Link>
             </li> }
 
-            { user.granted_roles.indexOf('super-admin') >= 0 && <li>
+            { (user.granted_roles||[]).indexOf('super-admin') >= 0 && <li>
               <Link className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker cursor-pointer" to="/users">Manage Users</Link>
             </li> }
 

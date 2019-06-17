@@ -68,6 +68,8 @@ module.exports = {
 
       user.gravatar = `https://www.gravatar.com/avatar/${require('crypto').createHash('md5').update(user.email).digest('hex')}?d=mp`
 
+      console.log(user.roles, user.roles)
+
       if ( user.roles.indexOf('super-admin') >= 0 ) {
         user.granted_roles = APP_CONFIG.USER_ROLES
       } else if ( user.roles.indexOf('admin') >= 0 ) {
@@ -162,9 +164,6 @@ module.exports = {
 
   async getCurrentUser( req, skip_globals=false )
   {
-    if ( ! skip_globals && 'CURRENT_USER' in global )
-      return CURRENT_USER // no setter yet @todo
-
     const auth_cookie = APP_UTIL.getCookie( req, {}, 'auth' )
 
     if ( ! auth_cookie )
@@ -429,6 +428,10 @@ module.exports = {
     }
 
     for ( let k in update ) {
+      if ( 'password' == k ) {
+        update[k] = await require('bcryptjs').hash( update[k], 10 )
+      }
+
       update[k] === user[k] && (delete update[k])
     }
 
