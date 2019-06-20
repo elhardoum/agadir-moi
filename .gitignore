@@ -4,3 +4,7 @@ package-lock.json
 .env
 admin/gcp-user.json
 local
+mobile/android
+mobile/ios
+mobile/node_modules
+mobile/package-lock.json

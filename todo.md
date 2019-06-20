@@ -16,6 +16,7 @@
 - [x] migrate some configs to dotenv
 - [x] migrate firebase URIs to dotenv
 - [ ] posts - persist ids raw list in memory for NoSQL pagination
+<!-- https://am.elh.solutions/events/edit/40411111111111111 -->
 
 <!-- and more to come -->
 
