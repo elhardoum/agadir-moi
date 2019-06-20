@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native'
 import GestureRecognizer from 'react-native-swipe-gestures'
-import * as Animatable from 'react-native-animatable'
+import { View as AnimatableView } from 'react-native-animatable'
 
 export default class LoadingScreen extends Component
 {
@@ -20,13 +20,16 @@ export default class LoadingScreen extends Component
 
   render()
   {
-    const { index=0 } = this.state
+    const { index=0, dotsLayout } = this.state
 
     return (
       <GestureRecognizer style={ styles.container }
         onSwipeRight={e => this.setState({ index: Math.max(0, index-1) }, _ => index > 0 && this.animate())}
-        onSwipeLeft={e => this.setState({ index: Math.min(2, index+1) }, _ => index < 2 && this.animate())}>
-        <Animatable.View ref={ref => this.REFs.view = ref} style={ styles.container }>
+        onSwipeLeft={e => this.setState({ index: Math.min(2, index+1) }, _ => {
+          index < 2 && this.animate()
+          index >= 2 && this.props.state.set({ pastWelcomeScreen: true })
+        })}>
+        <AnimatableView ref={ref => this.REFs.view = ref} style={ styles.container }>
           {(_ => {
             switch(index) {
               case 1:
@@ -57,27 +60,33 @@ export default class LoadingScreen extends Component
               'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
             ][index]}
           </Text>
-        </Animatable.View>
+        </AnimatableView>
 
-        <View style={styles.dotWrapper}>
+        <View style={styles.dotWrapper} onLayout={e => this.setState({ dotsLayout: e.nativeEvent.layout })}>
           <TouchableOpacity style={styles.dotButton} onPress={e => this.setState(
             { index: 0 }, _ => index !== 0 && this.animate()
           )} activeOpacity={0.9}>
-            <View style={[styles.dot, 0 == index ? styles.dotActive : {}]}></View>
+            <View style={[styles.dot, 0 == index && styles.dotActive ]}></View>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.dotButton} onPress={e => this.setState(
             { index: 1 }, _ => index !== 1 && this.animate()
           )} activeOpacity={0.9}>
-            <View style={[styles.dot, 1 == index ? styles.dotActive : {}]}></View>
+            <View style={[styles.dot, 1 == index && styles.dotActive ]}></View>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.dotButton} onPress={e => this.setState(
             { index: 2 }, _ => index !== 2 && this.animate()
           )} activeOpacity={0.9}>
-            <View style={[styles.dot, 2 == index ? styles.dotActive : {}]}></View>
+            <View style={[styles.dot, 2 == index && styles.dotActive ]}></View>
           </TouchableOpacity>
         </View>
+
+        {!! dotsLayout && <View style={[styles.skipButtonContainer, {top: dotsLayout.y}]}>
+          <TouchableOpacity onPress={e => this.props.state.set({ pastWelcomeScreen: true })} activeOpacity={0.9}>
+            <Text style={styles.skipButton}>{ index === 2 ? 'Finish' : 'Skip' }</Text>
+          </TouchableOpacity>
+        </View>}
       </GestureRecognizer>
     )
   }
@@ -134,4 +143,13 @@ const styles = StyleSheet.create({
   dotActive: {
     backgroundColor: '#464452',
   },
+  skipButtonContainer: {
+    position: 'absolute',
+    right: 0,
+    marginRight: 25
+  },
+  skipButton: {
+    color: '#555',
+    textDecorationLine: 'underline',
+  }
 })
