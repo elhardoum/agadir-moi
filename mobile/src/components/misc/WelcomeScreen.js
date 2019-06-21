@@ -35,17 +35,17 @@ export default class LoadingScreen extends Component
               case 1:
                 return <Image
                   style={ styles.headerImage }
-                  source={ require('./../../images/news.png') } />
+                  source={ require('./../../images/splash-screen-01.png') } />
 
               case 2:
                 return <Image
                   style={ styles.headerImage }
-                  source={ require('./../../images/warning.png') } />
+                  source={ require('./../../images/splash-screen-02.png') } />
 
               default:
                 return <Image
                   style={ styles.headerImage }
-                  source={ require('./../../images/truck.png') } />
+                  source={ require('./../../images/splash-screen-03.png') } />
             }
           })()}
 
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   headerImage: {
-    marginBottom: 30
+    marginBottom: 0
   },
   title: {
     alignSelf: 'center',

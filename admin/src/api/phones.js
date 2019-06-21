@@ -19,17 +19,26 @@ module.exports = {
 
         default: return default_callback()
       }
+    }, _ =>
+    {
+      switch ( true ) {
+        case req.basicAuthPassed && slug === 'GET important-phone-numbers':
+          return this.httpGet(req, res)
+
+        default:
+          return res.sendJSON(null, 403)
+      }
     })
   },
 
-  async permissionsCheck( req, res, then )
+  async permissionsCheck( req, res, then, authCatch )
   {
     const user = await require('./users').getCurrentUser( req )
 
     if ( user && user.roles && user.roles.join('').indexOf('admin') >= 0 )
       return then(req, res)
 
-    return res.sendJSON(null, 403)
+    return authCatch ? authCatch(req, res) : res.sendJSON(null, 403)
   },
 
   prepareRawList(list)

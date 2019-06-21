@@ -33,3 +33,7 @@ class App extends Component
 }
 
 AppRegistry.registerComponent(appName, () => App)
+
+// load globals
+import i18n from './src/util/i18n'
+global.i18n = i18n
