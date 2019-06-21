@@ -11,6 +11,7 @@
     "react": "16.8.3",
     "react-native": "0.59.9",
     "react-native-animatable": "^1.3.2",
+    "react-native-fs": "^2.13.3",
     "react-native-linear-gradient": "^2.5.4",
     "react-native-side-menu": "git+https://github.com/elhardoum/react-native-side-menu.git",
     "react-native-swipe-gestures": "^1.0.3",

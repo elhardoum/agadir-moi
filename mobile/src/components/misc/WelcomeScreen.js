@@ -82,7 +82,7 @@ export default class LoadingScreen extends Component
           </TouchableOpacity>
         </View>
 
-        {!! dotsLayout && <View style={[styles.skipButtonContainer, {top: dotsLayout.y}]}>
+        {!! dotsLayout && <View style={[styles.skipButtonContainer, {top: dotsLayout.y -10, padding: 10}]}>
           <TouchableOpacity onPress={e => this.props.state.set({ pastWelcomeScreen: true })} activeOpacity={0.9}>
             <Text style={styles.skipButton}>{ index === 2 ? 'Finish' : 'Skip' }</Text>
           </TouchableOpacity>

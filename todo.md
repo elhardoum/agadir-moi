@@ -25,5 +25,10 @@
 - [ ] `Infinity` of features
 - [ ] firebase data store and sync (advertises real time syncing for connected devices)
 - [ ] push notifications or sms for opted collectors
+- [ ] data sync - preload everything on start, store data locally, compare timestamps to fetch new updates
+- [ ] news index and details
+- [ ] events index and details
+- [ ] phones list and native linking
+- [ ] weather / use central server to bypass free-package limitations, update data each 3 hours
 
 <!-- and more to come (send help) -->

@@ -5,6 +5,12 @@ import Menu from './Menu'
 import MenuOverlay from './MenuOverlay'
 import StatusBar from './StatusBar'
 
+import { NativeRouter, Route, BackButton } from 'react-router-native'
+
+import Home from './../home/'
+import News from './../news/'
+import Events from './../events/'
+
 const SideMenu = require('react-native-side-menu').default
 const ScreenDimensions = Dimensions.get('window')
 
@@ -34,19 +40,23 @@ export default class AppContent extends Component
 
     return (
       <View style={{ flex: 1, backgroundColor: '#28323e' }}>
-        <SideMenu
-          onSliding={(left) => this.state.overlayStateSetter && this.onSideMenuMove(left)}
-          menu={<Menu dimensions={ScreenDimensions}/>}
-          isOpen={ isMenuOpen }
-          bounceBackOnOverdraw={ false }
-          openMenuOffset={ScreenDimensions.width * 0.8}
-        >
-          <View style={{ flex: 1, backgroundColor: '#fff' }}>
-            <Text>Home screen</Text>
-          </View>
+        <NativeRouter>
+          <BackButton>
+            <SideMenu
+              onSliding={(left) => this.state.overlayStateSetter && this.onSideMenuMove(left)}
+              menu={<Menu dimensions={ScreenDimensions} {...this.props}/>}
+              isOpen={ isMenuOpen }
+              bounceBackOnOverdraw={ false }
+              openMenuOffset={ScreenDimensions.width * 0.85}>
 
-          <MenuOverlay { ...this.props } captureStateSetter={overlayStateSetter => this.setState({ overlayStateSetter })} />
-        </SideMenu>
+              <Route path='/' exact render={routerProps => <Home {...this.props} {...routerProps} />} />
+              <Route path='/news' render={routerProps => <News {...this.props} {...routerProps} />} />
+              <Route path='/events' render={routerProps => <Events {...this.props} {...routerProps} />} />
+
+              <MenuOverlay { ...this.props } captureStateSetter={overlayStateSetter => this.setState({ overlayStateSetter })} />
+            </SideMenu>
+          </BackButton>
+        </NativeRouter>
       </View>
     )
   }

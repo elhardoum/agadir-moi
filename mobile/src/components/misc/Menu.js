@@ -1,10 +1,13 @@
 import React, { Component } from 'react'
 import { ScrollView, Text, View, Image, StyleSheet, TouchableHighlight } from 'react-native'
 
-export default class Menu extends Component {
-   render()
-   {
-     return (
+import { Link } from 'react-router-native'
+
+export default class Menu extends Component
+{
+  render()
+  {
+    return (
       <ScrollView scrollsToTop={false}>
         <View style={[styles.menuContainer, { height: this.props.dimensions.height }]}>
           <View style={styles.logoContainer}>
@@ -16,7 +19,7 @@ export default class Menu extends Component {
           </View>
 
           <View style={styles.buttonsContainer}>
-            <TouchableHighlight underlayColor='#ececec' onPress={e => void 0} style={[styles.button, styles.buttonActive]}>
+            <Link to='/' underlayColor='#ececec' onPress={e => this.props.state.set({ isMenuOpen: false })} style={[styles.button, styles.buttonActive]}>
               <React.Fragment>
                 <Image
                   style={styles.buttonImg}
@@ -24,9 +27,9 @@ export default class Menu extends Component {
                 />
                 <Text style={[styles.buttonText, {color: '#fff'}]}>Acceuil</Text>
               </React.Fragment>
-            </TouchableHighlight>
+            </Link>
 
-            <TouchableHighlight underlayColor='#ececec' onPress={e => void 0} style={styles.button}>
+            <Link to='/news' underlayColor='#ececec' onPress={e => this.props.state.set({ isMenuOpen: false })} style={styles.button}>
               <React.Fragment>
                 <Image
                   style={styles.buttonImg}
@@ -34,9 +37,19 @@ export default class Menu extends Component {
                 />
                 <Text style={styles.buttonText}>Actualités</Text>
               </React.Fragment>
-            </TouchableHighlight>
+            </Link>
 
-            <TouchableHighlight underlayColor='#ececec' onPress={e => void 0} style={styles.button}>
+            <Link to='/events' underlayColor='#ececec' onPress={e => this.props.state.set({ isMenuOpen: false })} style={styles.button}>
+              <React.Fragment>
+                <Image
+                  style={styles.buttonImg}
+                  source={require('./../../images/logo.png')}
+                />
+                <Text style={styles.buttonText}>Événements</Text>
+              </React.Fragment>
+            </Link>
+
+            <Link to='/' underlayColor='#ececec' onPress={e => this.props.state.set({ isMenuOpen: false })} style={styles.button}>
               <React.Fragment>
                 <Image
                   style={styles.buttonImg}
@@ -44,9 +57,9 @@ export default class Menu extends Component {
                 />
                 <Text style={styles.buttonText}>Pratique</Text>
               </React.Fragment>
-            </TouchableHighlight>
+            </Link>
 
-            <TouchableHighlight underlayColor='#ececec' onPress={e => void 0} style={styles.button}>
+            <Link to='/' underlayColor='#ececec' onPress={e => this.props.state.set({ isMenuOpen: false })} style={styles.button}>
               <React.Fragment>
                 <Image
                   style={styles.buttonImg}
@@ -54,9 +67,9 @@ export default class Menu extends Component {
                 />
                 <Text style={styles.buttonText}>Carte Interactive</Text>
               </React.Fragment>
-            </TouchableHighlight>
+            </Link>
 
-            <TouchableHighlight underlayColor='#ececec' onPress={e => void 0} style={styles.button}>
+            <Link to='/' underlayColor='#ececec' onPress={e => this.props.state.set({ isMenuOpen: false })} style={styles.button}>
               <React.Fragment>
                 <Image
                   style={styles.buttonImg}
@@ -64,9 +77,9 @@ export default class Menu extends Component {
                 />
                 <Text style={styles.buttonText}>Réclamation</Text>
               </React.Fragment>
-            </TouchableHighlight>
+            </Link>
 
-            <TouchableHighlight underlayColor='#ececec' onPress={e => void 0} style={styles.button}>
+            <Link to='/' underlayColor='#ececec' onPress={e => this.props.state.set({ isMenuOpen: false })} style={styles.button}>
               <React.Fragment>
                 <Image
                   style={styles.buttonImg}
@@ -74,12 +87,12 @@ export default class Menu extends Component {
                 />
                 <Text style={styles.buttonText}>Paramétres</Text>
               </React.Fragment>
-            </TouchableHighlight>
+            </Link>
           </View>
         </View>
       </ScrollView>
-     );
-   }
+    )
+  }
 }
 
 const styles = StyleSheet.create({

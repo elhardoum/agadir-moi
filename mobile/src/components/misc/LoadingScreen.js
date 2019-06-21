@@ -10,7 +10,7 @@ export default class LoadingScreen extends Component
       <LinearGradient style={ styles.container } start={{x: 1, y: 0}} end={{x: 0, y: 1}} colors={['#11096c', '#1a5293', '#2297b7']}>
         <Image
           style={ styles.logo }
-          source={ require('./../../images/logo.png') } />
+          source={ require('./../../images/logo@hr.png') } />
         <Text style={ styles.logoLabel }>Agadir & Moi</Text>
       </LinearGradient>
     )
