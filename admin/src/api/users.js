@@ -33,20 +33,23 @@ module.exports = {
           switch ( slug ) {
             case 'PUT users/manage':
             case 'POST users/manage':
-              return this.httpManageCreate( req, res )        
+              return this.httpManageCreate( req, res )
 
             case 'GET users/manage':
-              return this.httpManageList( req, res )        
+              return this.httpManageList( req, res )
 
             case 'DELETE users/manage':
-              return this.httpManageDelete( req, res, user )        
+              return this.httpManageDelete( req, res, user )
 
             case 'PATCH users/manage':
-              return this.httpManageUpdate( req, res )        
+              return this.httpManageUpdate( req, res )
 
             default: return default_callback()
           }
         })
+
+      case 'GET auth/gc-access-token':
+        return this.httpDataAccessToken( req, res )
 
       default: return default_callback()
     }
@@ -679,4 +682,16 @@ module.exports = {
     }
   },
 
+  async httpDataAccessToken(req, res)
+  {
+    if ( ! req.basicAuthPassed )
+      return res.sendJSON(null, 401)
+
+    const { GoogleToken } = require('gtoken'), gtoken = new GoogleToken({
+      keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+      scope: ['https://www.googleapis.com/auth/datastore'],
+    })
+
+    return res.sendJSON(...await new Promise(res => gtoken.getToken((err, token) => res(err ? [null, 500] : [token]))))
+  }
 }

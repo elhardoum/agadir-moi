@@ -63,6 +63,7 @@ const http = require('http'), server = http.createServer(async (req, res) =>
       case 'GET users/manage':
       case 'DELETE users/manage':
       case 'PATCH users/manage':
+      case 'GET auth/gc-access-token':
         return require('./src/api/users').http( request_name, req, res, default_callback )
       
       case 'PUT important-phone-numbers':
