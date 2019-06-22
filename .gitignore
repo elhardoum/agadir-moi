@@ -8,3 +8,4 @@ mobile/android
 mobile/ios
 mobile/node_modules
 mobile/package-lock.json
+mobile/env.json

@@ -35,7 +35,7 @@ export default class LoadingScreen extends Component
               case 1:
                 return <Image
                   style={ styles.headerImage }
-                  source={ require('./../../images/splash-screen-01.png') } />
+                  source={ require('./../../images/splash-screen-03.png') } />
 
               case 2:
                 return <Image
@@ -45,7 +45,7 @@ export default class LoadingScreen extends Component
               default:
                 return <Image
                   style={ styles.headerImage }
-                  source={ require('./../../images/splash-screen-03.png') } />
+                  source={ require('./../../images/splash-screen-01.png') } />
             }
           })()}
 
@@ -84,7 +84,7 @@ export default class LoadingScreen extends Component
 
         {!! dotsLayout && <View style={[styles.skipButtonContainer, {top: dotsLayout.y -10, padding: 10}]}>
           <TouchableOpacity onPress={e => this.props.state.set({ pastWelcomeScreen: true })} activeOpacity={0.9}>
-            <Text style={styles.skipButton}>{ index === 2 ? 'Finish' : 'Skip' }</Text>
+            <Text style={styles.skipButton}>{ index === 2 ? i18n('Finish') : i18n('Skip') }</Text>
           </TouchableOpacity>
         </View>}
       </GestureRecognizer>
