@@ -79,6 +79,8 @@ module.exports = class news
         ...(images && {images: (Array.isArray(images)?images:[images]).map(decodeURIComponent)}),
       })
 
+      APP_UTIL.metadata.update({ [`${this.collectionId}_updated`]: +new Date })
+
       return res.sendJSON({success: true, id})
     } catch (e) {}
 
@@ -188,6 +190,8 @@ module.exports = class news
         timeUpdated: +new Date,
       })
 
+      APP_UTIL.metadata.update({ [`${this.collectionId}_updated`]: +new Date })
+
       return res.sendJSON({success: true, id})
     } catch (e) {}
 
@@ -220,6 +224,8 @@ module.exports = class news
       try {
         await Promise.all(deletes)
       } catch(e) {/*pass*/}
+
+      APP_UTIL.metadata.update({ [`${this.collectionId}_updated`]: +new Date })
 
       return responseHandler({success: true})
     }

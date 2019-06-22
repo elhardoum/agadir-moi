@@ -129,5 +129,62 @@ module.exports = {
       databaseURL: process.env.FIREBASE_DATABASE_URL,
     })
     return admin
+  },
+
+  metadata: {
+    async getAll()
+    {
+      const admin = APP_UTIL.initFirebaseApp()
+
+      try {
+        const db = admin.database(), postRef = db.ref('posts/metadata')
+        return (await new Promise(res => postRef.once('value', snap => res(snap.val())))) || {}
+      } catch (e) {
+        return undefined
+      }
+    },
+
+    async get(key, _default)
+    {
+      const data = await this.getAll() || {}
+      return key in data ? data[key] : _default
+    },
+
+    async update(key, value)
+    {
+      const admin = APP_UTIL.initFirebaseApp(), db = admin.database(), ref = db.ref('posts/metadata')
+
+      try {
+        await ref.update( 'object' === typeof key && ! value ? key : {[key]: value} )
+        return true
+      } catch(e) {}
+    },
+
+    async delete(key)
+    {
+      const data = await this.getAll()
+
+      if ( ! data || ! ( key in data ) )
+        return true
+
+      delete data[key]
+
+      const admin = APP_UTIL.initFirebaseApp(), db = admin.database(), ref = db.ref('posts/metadata')
+
+      try {
+        await ref.set(data)
+        return true
+      } catch(e) {}
+    },
+
+    async deleteAll(key)
+    {
+      const admin = APP_UTIL.initFirebaseApp(), db = admin.database(), ref = db.ref('posts/metadata')
+
+      try {
+        await ref.remove()
+        return true
+      } catch(e) {}
+    },
   }
 }

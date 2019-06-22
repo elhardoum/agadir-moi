@@ -5,7 +5,7 @@ module.exports = class phones extends news
   constructor(...args)
   {
     super(...args)
-    this.collectionId = 'important-phone-numbers'
+    this.collectionId = 'phones'
     this.DEFAULT_LIST_LIMIT = undefined
   }
 
@@ -37,6 +37,8 @@ module.exports = class phones extends news
       const id = this.uid(), db = admin.database(), ref = db.ref('posts')
 
       await ref.child(`${this.collectionId}/${id}`).set({id, category, number: phone, group, timeCreated: +new Date,})
+
+      APP_UTIL.metadata.update({ [`${this.collectionId}_updated`]: +new Date })
 
       req.parsedQuery.limit = -1
       return res.sendJSON({success: true, list: (await this.httpGet(req, res, d => d)).items||[]})
@@ -100,9 +102,11 @@ module.exports = class phones extends news
         timeUpdated: +new Date,
       })
 
+      APP_UTIL.metadata.update({ [`${this.collectionId}_updated`]: +new Date })
+
       req.parsedQuery.limit = -1
       return res.sendJSON({success: true, list: (await this.httpGet(req, res, d => d)).items||[]})
-    } catch (e) { console.log(e) }
+    } catch (e) {}
 
     return res.sendJSON({success: false})
   }

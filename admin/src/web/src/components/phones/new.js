@@ -26,7 +26,7 @@ export default class ImportantPhoneNumbersNew extends Component
 
     const list = this.props.getGlobalState('phones/raw-list')
 
-    list || fetch('/api/important-phone-numbers')
+    list || fetch('/api/phones')
       .then(res => res.json())
       .then(list => list && list.items && Array.isArray(list.items) && this.props.setGlobalState({'phones/raw-list': list.items}))
       .catch(e => 1)
@@ -64,7 +64,7 @@ export default class ImportantPhoneNumbersNew extends Component
     try {
       this.setState({loading: true})
 
-      let res = await fetch('/api/important-phone-numbers', {
+      let res = await fetch('/api/phones', {
         method: 'PUT',
         body: `category=${encodeURIComponent(category.trim())}&phone=${encodeURIComponent(phone.trim())}&group=${encodeURIComponent(group.trim())}`,
         headers: { 'Content-type': 'application/x-www-form-urlencoded' },

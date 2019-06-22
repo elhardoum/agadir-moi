@@ -19,7 +19,7 @@ export default class ImportantPhoneNumbers extends Component
 
     const list = this.props.getGlobalState('phones/raw-list')
 
-    list || fetch('/api/important-phone-numbers')
+    list || fetch('/api/phones')
       .then(res => res.json())
       .then(list => list && list.items && Array.isArray(list.items) && this.props.setGlobalState({'phones/raw-list': list.items}))
       .catch(e => 1)
@@ -36,7 +36,7 @@ export default class ImportantPhoneNumbers extends Component
     } catch ( e ) { /* pass */ }
 
     try {
-      fetch('/api/important-phone-numbers', {
+      fetch('/api/phones', {
         method: 'DELETE',
         body: `id=${id}`,
         signal: this.ABORT_CONTROLLER.signal

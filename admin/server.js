@@ -53,11 +53,11 @@ const http = require('http'), server = http.createServer(async (req, res) =>
       case 'PATCH users/manage':
         return require('./src/api/users').http( request_name, req, res, default_callback )
       
-      case 'PUT important-phone-numbers':
-      case 'POST important-phone-numbers':
-      case 'GET important-phone-numbers':
-      case 'DELETE important-phone-numbers':
-      case 'PATCH important-phone-numbers':
+      case 'PUT phones':
+      case 'POST phones':
+      case 'GET phones':
+      case 'DELETE phones':
+      case 'PATCH phones':
         const phones = require('./src/api/phones')
         return (new phones).http( request_name, req, res, default_callback )
 
