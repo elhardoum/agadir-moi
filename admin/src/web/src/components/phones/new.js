@@ -28,7 +28,7 @@ export default class ImportantPhoneNumbersNew extends Component
 
     list || fetch('/api/important-phone-numbers')
       .then(res => res.json())
-      .then(list => Array.isArray(list) && this.props.setGlobalState({'phones/raw-list': list}))
+      .then(list => list && list.items && Array.isArray(list.items) && this.props.setGlobalState({'phones/raw-list': list.items}))
       .catch(e => 1)
   }
 

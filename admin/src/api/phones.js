@@ -1,50 +1,13 @@
-module.exports = {
-  http( slug, req, res, default_callback )
+const news = require('./news')
+
+module.exports = class phones extends news
+{
+  constructor(...args)
   {
-    this.permissionsCheck(req, res, _ =>
-    {
-      switch ( slug ) {
-        case 'PUT important-phone-numbers':
-        case 'POST important-phone-numbers':
-          return this.httpPut( req, res )
-
-        case 'PATCH important-phone-numbers':
-          return this.httpUpdate( req, res )
-
-        case 'GET important-phone-numbers':
-          return this.httpGet( req, res )
-
-        case 'DELETE important-phone-numbers':
-          return this.httpDelete( req, res )
-
-        default: return default_callback()
-      }
-    }, _ =>
-    {
-      switch ( true ) {
-        case req.basicAuthPassed && slug === 'GET important-phone-numbers':
-          return this.httpGet(req, res)
-
-        default:
-          return res.sendJSON(null, 403)
-      }
-    })
-  },
-
-  async permissionsCheck( req, res, then, authCatch )
-  {
-    const user = await require('./users').getCurrentUser( req )
-
-    if ( user && user.roles && user.roles.join('').indexOf('admin') >= 0 )
-      return then(req, res)
-
-    return authCatch ? authCatch(req, res) : res.sendJSON(null, 403)
-  },
-
-  prepareRawList(list)
-  {
-    return list
-  },
+    super(...args)
+    this.collectionId = 'important-phone-numbers'
+    this.DEFAULT_LIST_LIMIT = undefined
+  }
 
   async httpPut( req, res )
   {
@@ -68,27 +31,35 @@ module.exports = {
       return res.sendJSON({ success: false, errors })
     }
 
-    let list = ((await APP_UTIL.fireStoreSimple.get('kv/important-phone-numbers'))||{}).list || []
-      , set = await APP_UTIL.fireStoreSimple.set('kv/important-phone-numbers', {
-      list: (list=list.concat({
-        number: phone.trim(),
-        category: category.trim(),
-        group: group.trim(),
-        t: +new Date
-      }))
-    })
+    const admin = APP_UTIL.initFirebaseApp()
 
-    res.sendJSON({
-      success: Boolean(set),
-      list: this.prepareRawList(list)
+    try {
+      const id = this.uid(), db = admin.database(), ref = db.ref('posts')
+
+      await ref.child(`${this.collectionId}/${id}`).set({id, category, number: phone, group, timeCreated: +new Date,})
+
+      req.parsedQuery.limit = -1
+      return res.sendJSON({success: true, list: (await this.httpGet(req, res, d => d)).items||[]})
+    } catch (e) {}
+
+    return res.sendJSON({success: false})
+  }
+
+  httpDelete(req, res)
+  {
+    return super.httpDelete( req, res, async (...args) =>
+    {
+      req.parsedQuery.limit = -1
+      args[0].list = (await this.httpGet(req, res, d => d)).items || []
+      return res.sendJSON( ... args )
     })
-  },
+  }
 
   async httpUpdate( req, res )
   {
     let { category, phone, group, id } = req.parsedQuery
 
-    let errors = []
+    let errors = [], post, db, postRef
 
     if ( ! id || ! /^\d+$/.test(id) ) {
       errors.push({field: 'general', error: 'Could not find a record for this number.'})
@@ -110,61 +81,42 @@ module.exports = {
       return res.sendJSON({ success: false, errors })
     }
 
-    let list = ((await APP_UTIL.fireStoreSimple.get('kv/important-phone-numbers'))||{}).list || []
-      , item = list.find(x => x.t == id)
+    const admin = APP_UTIL.initFirebaseApp()
 
-    if ( ! item || ! item.t ) {
+    try {
+      db = admin.database()
+      postRef = db.ref(`posts/${this.collectionId}/${id}`)
+      post = (await new Promise(res => postRef.once('value', snap => res(snap.val()))))||{}
+    } catch (e) {}
+
+    if ( ! post || post.id != id ) {
       errors.push({field: 'general', error: 'Could not find a record for this number.'})
       return res.sendJSON({ success: false, errors })
     }
 
-    let updated = true
-
-    if ( item.category !== category || item.number !== phone || item.group !== group ) {
-      list.map(x => x.t == id ? Object.assign(x, {
-        category, number: phone, group, m: +new Date
-      }) : x)
-
-      updated = await APP_UTIL.fireStoreSimple.set('kv/important-phone-numbers', { list })
-    }
-
-    return res.sendJSON({
-      success: Boolean(updated),
-      list: this.prepareRawList(list)
-    })
-  },
-
-  async httpGet( req, res )
-  {
-    let data = await APP_UTIL.fireStoreSimple.get('kv/important-phone-numbers')
-      , list = (data||{}).list
-    return res.sendJSON( this.prepareRawList( list||[] ) )
-  },
-
-  async httpDelete( req, res )
-  {
-    let { id: ids } = req.parsedQuery
-    ids = (Array.isArray(ids) ? ids : [ids]).map(id => +id).filter(Boolean)
-
-    let list_origin = ((await APP_UTIL.fireStoreSimple.get('kv/important-phone-numbers'))||{}).list || [], list
-
-    if ( list_origin.length == 0 )
-      return res.sendJSON({
-        success: Boolean(updated),
-        list: this.prepareRawList(list_origin)
+    try {
+      await postRef.update({
+        category, number: phone, group,
+        timeUpdated: +new Date,
       })
 
-    list = list_origin.map(x => ids.indexOf(x.t) >= 0 ? null : x).filter(Boolean)
+      req.parsedQuery.limit = -1
+      return res.sendJSON({success: true, list: (await this.httpGet(req, res, d => d)).items||[]})
+    } catch (e) { console.log(e) }
 
-    let updated = true
+    return res.sendJSON({success: false})
+  }
 
-    if ( list.length !== list_origin.length ) {
-      updated = await APP_UTIL.fireStoreSimple.set('kv/important-phone-numbers', { list })
+  parseItemData(data)
+  {
+    return {
+      id: data.id,
+      t: data.id,
+      category: data.category,
+      number: data.number,
+      group: data.group,
+      timeCreated: data.timeCreated,
+      ...( data.timeUpdated && {timeUpdated: data.timeUpdated} ),
     }
-
-    return res.sendJSON({
-      success: Boolean(updated),
-      list: this.prepareRawList(list)
-    })
-  },
+  }
 }

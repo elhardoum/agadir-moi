@@ -3,12 +3,6 @@ const http = require('http'), server = http.createServer(async (req, res) =>
   const url = require('url')
       , querystring = require('querystring')
       , parsed = url.parse(req.url)
-      , corsSet = _ => void res.setHeader('Access-Control-Allow-Origin', '*') || res
-        .setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization')
-
-  if ( 'OPTIONS' === req.method ) {
-    return corsSet(), res.end()
-  }
 
   parsed.pathname = parsed.pathname.replace(/^\/{1,}/g, '/').replace(/\/{1,}$/g, '')
 
@@ -40,12 +34,6 @@ const http = require('http'), server = http.createServer(async (req, res) =>
       return res.end( 'string' == typeof stack ? stack : JSON.stringify( stack ) )
     }
 
-    if ( 'authorization' in req.headers ) {
-      let token = req.headers['authorization'].split(' ').pop()
-      req.basicAuthPassed = token && process.env.API_AUTHORIZATION_TOKEN === token
-      req.basicAuthPassed && corsSet()
-    }
-
     // globals
     global.APP_CONFIG = require('./src/api/config')
     global.APP_UTIL = require('./src/api/util')
@@ -63,7 +51,6 @@ const http = require('http'), server = http.createServer(async (req, res) =>
       case 'GET users/manage':
       case 'DELETE users/manage':
       case 'PATCH users/manage':
-      case 'GET auth/gc-access-token':
         return require('./src/api/users').http( request_name, req, res, default_callback )
       
       case 'PUT important-phone-numbers':
@@ -71,7 +58,8 @@ const http = require('http'), server = http.createServer(async (req, res) =>
       case 'GET important-phone-numbers':
       case 'DELETE important-phone-numbers':
       case 'PATCH important-phone-numbers':
-        return require('./src/api/phones').http( request_name, req, res, default_callback )
+        const phones = require('./src/api/phones')
+        return (new phones).http( request_name, req, res, default_callback )
 
       case 'PUT storage/images':
       case 'GET storage/images':

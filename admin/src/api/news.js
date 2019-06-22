@@ -3,6 +3,7 @@ module.exports = class news
   constructor()
   {
     this.collectionId = 'news'
+    this.DEFAULT_LIST_LIMIT = process.env.POSTS_ITEMS_PER_PAGE || 10
   }
 
   http( slug, req, res, default_callback )
@@ -31,32 +32,17 @@ module.exports = class news
 
         default: return default_callback()
       }
-    }, _ =>
-    {
-      switch ( true ) {
-        case req.basicAuthPassed && slug === `GET ${this.collectionId}`:
-          return this.httpGet( req, res )
-
-        case req.basicAuthPassed && slug === `GET ${this.collectionId}/categories`:
-          return this.httpGetCategories( req, res )
-
-        case req.basicAuthPassed && slug === `GET ${this.collectionId}/item`:
-          return this.httpGetItem( req, res )
-
-        default:
-          return res.sendJSON(null, 403)
-      }
     })
   }
 
-  async permissionsCheck( req, res, then, authCatch )
+  async permissionsCheck( req, res, then )
   {
     const user = await require('./users').getCurrentUser( req )
 
     if ( user && user.roles && user.roles.join('').indexOf('admin') >= 0 )
       return then(req, res)
 
-    return authCatch ? authCatch(req, res) : res.sendJSON(null, 403)
+    return res.sendJSON(null, 403)
   }
 
   uid()
@@ -112,19 +98,20 @@ module.exports = class news
     }
   }
 
-  async httpGet( req, res )
+  async httpGet( req, res, responseHandler )
   {
     let { start_at, limit } = req.parsedQuery
-
     const admin = APP_UTIL.initFirebaseApp()
+    responseHandler = responseHandler || res.sendJSON
 
     try {
-      limit = +limit||(process.env.POSTS_ITEMS_PER_PAGE||10)
-      let ref = admin.database().ref(`posts/${this.collectionId}`).orderByKey().limitToFirst(limit+1)
-      start_at && (ref=ref.startAt(String(start_at)))
+      limit = +limit > 0 ? +limit : this.DEFAULT_LIST_LIMIT
+      let ref = admin.database().ref(`posts/${this.collectionId}`).orderByKey()
+      limit && (ref=ref.limitToFirst(limit+1))
+      start_at && limit && (ref=ref.startAt(String(start_at)))
 
       let data = (await new Promise(res => ref.once('value', snap => res(snap.val()))))||{}
-        , next_cursor = Object.keys(data).length > limit ? Object.keys(data).pop() : null
+        , next_cursor = limit && Object.keys(data).length > limit ? Object.keys(data).pop() : null
         , previous_cursor = null
 
       for ( let id in data ) {
@@ -147,10 +134,10 @@ module.exports = class news
         } catch(e) {}
       }
 
-      return res.sendJSON({ items: Object.values(data), previous_cursor, next_cursor })
+      return responseHandler({ items: Object.values(data), previous_cursor, next_cursor })
     } catch (e) {}
 
-    return res.sendJSON(null, 500)
+    return responseHandler(null, 500)
   }
 
   async httpUpdate( req, res )
@@ -207,13 +194,15 @@ module.exports = class news
     return res.sendJSON({success: false})
   }
 
-  async httpDelete( req, res )
+  async httpDelete( req, res, responseHandler )
   {
     let { id: ids } = req.parsedQuery
     ids = (Array.isArray(ids) ? ids : [ids]).map(id => +id).filter(Boolean)
 
+    responseHandler = responseHandler || res.sendJSON
+
     if ( ids.length == 0 )
-      return res.sendJSON({success: true})
+      return responseHandler({success: true})
 
     const admin = APP_UTIL.initFirebaseApp()
 
@@ -232,10 +221,10 @@ module.exports = class news
         await Promise.all(deletes)
       } catch(e) {/*pass*/}
 
-      return res.sendJSON({success: true})
+      return responseHandler({success: true})
     }
 
-    return res.sendJSON({success: false})
+    return responseHandler({success: false})
   }
 
   async httpGetCategories( req, res )

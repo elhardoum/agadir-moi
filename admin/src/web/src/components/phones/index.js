@@ -21,7 +21,7 @@ export default class ImportantPhoneNumbers extends Component
 
     list || fetch('/api/important-phone-numbers')
       .then(res => res.json())
-      .then(list => Array.isArray(list) && this.props.setGlobalState({'phones/raw-list': list}))
+      .then(list => list && list.items && Array.isArray(list.items) && this.props.setGlobalState({'phones/raw-list': list.items}))
       .catch(e => 1)
   }
   
@@ -65,8 +65,8 @@ export default class ImportantPhoneNumbers extends Component
       items = items.filter(item => item.category === filter_category)
     }
 
-    const categories = [], sort = (a,b) => (b.m||b.t) - (a.m||a.t)
-    ;(this.props.getGlobalState('phones/raw-list')||[]).sort(sort).filter(item => categories.indexOf(item.category) < 0 && categories.push(item.category))
+    const categories = []
+    ;(this.props.getGlobalState('phones/raw-list')||[]).filter(item => categories.indexOf(item.category) < 0 && categories.push(item.category))
 
     return (
       <div className="h-full px-2">
@@ -94,7 +94,7 @@ export default class ImportantPhoneNumbers extends Component
                 </tr>
               </thead>
               <tbody className="text-grey-darker">
-                { items.sort(sort).map((item,i) => <tr className="border-b border-grey-light" key={i}>
+                { items.map((item,i) => <tr className="border-b border-grey-light" key={i}>
                   <td className="py-2">{ item.category }</td>
                   <td className="py-2">{ item.number }</td>
                   <td className="py-2">{ item.group }</td>

@@ -48,9 +48,6 @@ module.exports = {
           }
         })
 
-      case 'GET auth/gc-access-token':
-        return this.httpDataAccessToken( req, res )
-
       default: return default_callback()
     }
   },
@@ -681,17 +678,4 @@ module.exports = {
       return res.sendJSON({ success: false, errors: [{error: 'Internal server error, could not update user.'}] })
     }
   },
-
-  async httpDataAccessToken(req, res)
-  {
-    if ( ! req.basicAuthPassed )
-      return res.sendJSON(null, 401)
-
-    const { GoogleToken } = require('gtoken'), gtoken = new GoogleToken({
-      keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS,
-      scope: ['https://www.googleapis.com/auth/datastore'],
-    })
-
-    return res.sendJSON(...await new Promise(res => gtoken.getToken((err, token) => res(err ? [null, 500] : [token]))))
-  }
 }
