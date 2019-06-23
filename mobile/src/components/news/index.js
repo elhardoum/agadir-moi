@@ -2,9 +2,7 @@ import React, { Component } from 'react'
 import { View, Text, ScrollView, ActivityIndicator, Image, FlatList, Dimensions } from 'react-native'
 import { Toolbar, Button } from 'react-native-material-ui'
 import LinearGradient from 'react-native-linear-gradient'
-// testing with events because my lazy crew members didn't write a single news story yet!!
-// talk about lame people
-import { EventsSchema as NewsSchema } from './../../util/db'
+import { NewsSchema } from './../../util/db'
 
 const ScreenDimensions = Dimensions.get('window')
 
@@ -13,6 +11,7 @@ export default class News extends Component
   constructor(props)
   {
     super(props)
+    this.DB_SCHEMA = NewsSchema
 
     this.state = {
       categories: null, news: null, category: null, search: null, page: null
@@ -20,6 +19,7 @@ export default class News extends Component
 
     this.ABORT_CONTROLLER = new AbortController
     this.LISTVIEW_REF = null
+    this.componentId = 'news'
   }
 
   componentDidMount()
@@ -30,18 +30,22 @@ export default class News extends Component
     // due to the fact that this is free work, and having 7 days to finish up, let's forget about all of the extra premium features
   }
 
+  getSortBy = () => this.selectValue({ news: 'originId ASC', events: this.state.event_sort_start_date ? 'date_from DESC' : 'originId ASC' })
+
   loadQueryItems()
   {
     const { category, search, page=1 } = this.state
 
     this.props.db.open().then(realm =>
     {
-      let res = realm.objects(NewsSchema.name).filtered('TRUEPREDICATE DISTINCT(category)')
+      let res = realm.objects(this.DB_SCHEMA.name).filtered('TRUEPREDICATE DISTINCT(category)')
         , categories = res.map(item => Object.assign({}, item)).map(c => c.category)
       this.setState({ categories })
 
       const per_page = environ.posts_per_page || 10, page = Math.max(1, +this.state.page)
-      res = realm.objects(NewsSchema.name).filtered('TRUEPREDICATE SORT(originId ASC)')
+      res = realm.objects(this.DB_SCHEMA.name).filtered(`TRUEPREDICATE SORT(${this.getSortBy()})`)
+
+      console.log(this.getSortBy())
 
       if ( category ) {
         res = res.filtered('category=$0', category)
@@ -74,6 +78,11 @@ export default class News extends Component
     return this.setState({ search, news: null, end_results: null }, _ => setTimeout(this.loadQueryItems.bind(this), 100))
   }
 
+  applySort()
+  {
+    return this.setState({ news: null, end_results: null }, _ => setTimeout(this.loadQueryItems.bind(this), 100))
+  }
+
   onItemsListScroll({ layoutMeasurement, contentOffset, contentSize })
   {
     const paddingToBottom = ScreenDimensions.height * .70
@@ -88,7 +97,7 @@ export default class News extends Component
         this.props.db.open().then(realm =>
         {
           const per_page = environ.posts_per_page || 10, page = Math.max(1, +this.state.page) +1
-          let res = realm.objects(NewsSchema.name).filtered('TRUEPREDICATE SORT(originId ASC)')
+          let res = realm.objects(this.DB_SCHEMA.name).filtered(`TRUEPREDICATE SORT(${this.getSortBy()})`)
 
           if ( category ) {
             res = res.filtered('category=$0', category)
@@ -102,7 +111,7 @@ export default class News extends Component
 
           const newItems = res.map(item => Object.assign({}, item)).map(this.parseImages)
 
-          setTimeout(_ => this.setState({ page, loading_more: false, end_results: !newItems.length, news: news.concat(newItems) }), 6000)
+          this.setState({ page, loading_more: false, end_results: !newItems.length, news: news.concat(newItems) })
         }).catch(err => (environ.dev && console.log('err', err), undefined))
       })
     }
@@ -150,6 +159,8 @@ export default class News extends Component
     return padYstate > 0 ? Math.floor(Math.max(0, 15 - Math.min(15, padYstate))) : 15
   }
 
+  selectValue = ({ news, events }) => ({news, events}[this.componentId])
+
   render()
   {
     const padY = this.getHeaderYPadding()
@@ -160,7 +171,7 @@ export default class News extends Component
           <View style={{ paddingTop: 15||padY, paddingBottom: 15||padY, paddingLeft: 10, paddingRight: 10 }}>
             <Toolbar
               leftElement="menu"
-              centerElement="Actualités"
+              centerElement={ this.selectValue({ news: 'Actualités', events: 'Événements' }) }
               searchable={{
                 autoFocus: true,
                 placeholder: 'Recherche',
@@ -172,6 +183,21 @@ export default class News extends Component
               style={{
                 container: { backgroundColor: 'transparent' }
               }}
+              { ...this.selectValue({news: {}, events: {
+                rightElement: {
+                  menu: {
+                    icon: 'more-vert',
+                    labels: [
+                      `${!this.state.event_sort_start_date ? '✓ ' : ''}Trier par date publié`,
+                      `${this.state.event_sort_start_date ? '✓ ' : ''}Trier par date événements`,
+                    ]
+                  }
+                },
+                onRightElementPress: ({index}) =>
+                {
+                  !!this.state.event_sort_start_date !== !! index && this.setState({ event_sort_start_date: !!index }, _ => this.applySort())
+                },
+              }}) }
             />
           </View>
 
@@ -202,11 +228,36 @@ export default class News extends Component
           ref={r => this.LISTVIEW_REF = r}
           onScroll={e => this.onItemsListScroll(e.nativeEvent)}
           onChangeVisibleRows={e => console.log('onChangeVisibleRows', e)}
-          renderItem={({item}) => <View>
-            { item.ActivityIndicator ? <ActivityIndicator size="small" color="#55d1f3" style={{ height: 50 }} /> : <React.Fragment>
-              <Image source={{uri: item.images[0]}} style={{ flex: 1, height: 200, width: 200 }} onError={e => console.log('load error', e)} />
-              <Text>{ item.title }</Text>
-            </React.Fragment>}
+          renderItem={({item, index}) => <View>
+            { item.ActivityIndicator ? <ActivityIndicator size="small" color="#55d1f3" style={{ height: 50 }} /> : <View
+              style={{ margin: 20, marginTop: index ? 5 : 20, height: 200, flexDirection: 'column' }}>
+              
+              <Image
+                source={item.images[0] && {uri: item.images[0]} || require('./../../images/newspaper-default.jpg')}
+                style={{ width: '100%', height: 200, borderRadius: 15, position: 'absolute', left: 0 }} />
+
+              <Text style={{
+                color: '#fff', fontWeight: '600',
+                backgroundColor: '#0000002b',
+                borderBottomLeftRadius: 15, borderBottomRightRadius: 15,
+                fontSize: 16, width: '100%',
+
+                paddingLeft: 20, paddingRight: 20,
+                paddingBottom: 10, paddingTop: 10,
+
+                textShadowColor: '#000',
+                textShadowOffset: {width: -1, height: 1},
+                textShadowRadius: 10,
+
+                position: 'absolute', bottom: 0,
+              }}>{item.title}</Text>
+
+              <Button accent
+                style={{container: {
+                  position: 'absolute', top: 0, width: '100%', height: '100%', backgroundColor: 'transparent', borderRadius: 15,
+                }}}
+                text={''} upperCase={false} onPress={e => console.log('Load story')} />
+            </View>}
           </View>}>
         </FlatList>}
 

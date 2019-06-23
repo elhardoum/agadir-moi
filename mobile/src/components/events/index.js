@@ -1,14 +1,13 @@
 import React, { Component } from 'react'
-import { View, Text } from 'react-native'
+import { EventsSchema } from './../../util/db'
+import News from './../news/'
 
-export default class Events extends Component
+export default class Events extends News
 {
-  render()
+  constructor(props)
   {
-    return (
-      <View style={{ flex: 1, backgroundColor: '#fff' }}>
-        <Text>Events screen</Text>
-      </View>
-    )
+    super(props)
+    this.DB_SCHEMA = EventsSchema
+    this.componentId = 'events'
   }
 }

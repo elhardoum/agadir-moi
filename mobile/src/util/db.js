@@ -354,10 +354,8 @@ class Events
 
           if ( index >= 0 ) { // update existing record
             news[index] = data[id]
-            console.log('update', id, data[id].title)
           } else { // insert new record
             realm.create(EventsSchema.name, data[id])
-            console.log('insert', id, data[id].title)
           }
         }
 
