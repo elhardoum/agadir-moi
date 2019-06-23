@@ -13,6 +13,26 @@ import Events from './../events/'
 
 const SideMenu = require('react-native-side-menu').default
 const ScreenDimensions = Dimensions.get('window')
+let ROUTER_REF_HIST_PUSH
+
+class RenderProxy extends Component
+{
+  componentDidMount()
+  {
+    ROUTER_REF_HIST_PUSH = this.props.history.push
+
+    this.props.state.set({
+      router: {
+        match: this.props.match
+      }
+    })
+  }
+
+  render()
+  {
+    return <this.props.component {...this.props} />
+  }
+}
 
 export default class AppContent extends Component
 {
@@ -37,6 +57,7 @@ export default class AppContent extends Component
   render()
   {
     const { isMenuOpen=false } = this.props.state
+    const pushState = slug => ROUTER_REF_HIST_PUSH && ROUTER_REF_HIST_PUSH(slug)
 
     return (
       <View style={{ flex: 1, backgroundColor: '#28323e' }}>
@@ -44,14 +65,14 @@ export default class AppContent extends Component
           <BackButton>
             <SideMenu
               onSliding={(left) => this.state.overlayStateSetter && this.onSideMenuMove(left)}
-              menu={<Menu dimensions={ScreenDimensions} {...this.props}/>}
+              menu={<Menu dimensions={ScreenDimensions} {...this.props} pushState={pushState.bind(this)}/>}
               isOpen={ isMenuOpen }
               bounceBackOnOverdraw={ false }
               openMenuOffset={ScreenDimensions.width * 0.85}>
 
-              <Route path='/' exact render={routerProps => <Home {...this.props} {...routerProps} />} />
-              <Route path='/news' render={routerProps => <News {...this.props} {...routerProps} />} />
-              <Route path='/events' render={routerProps => <Events {...this.props} {...routerProps} />} />
+              <Route path='/' exact render={routerProps => <RenderProxy component={Home} {...this.props} {...routerProps} />} />
+              <Route path='/news' render={routerProps => <RenderProxy component={News} {...this.props} {...routerProps} />} />
+              <Route path='/events' render={routerProps => <RenderProxy component={Events} {...this.props} {...routerProps} />} />
 
               <MenuOverlay { ...this.props } captureStateSetter={overlayStateSetter => this.setState({ overlayStateSetter })} />
             </SideMenu>

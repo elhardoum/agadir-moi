@@ -7,7 +7,7 @@ const StateContext = React.createContext()
 
 class StateProvider extends Component
 {
-  state = {}
+  state = { router: {} }
 
   render()
   {

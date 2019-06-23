@@ -309,7 +309,7 @@ class Events
       if ( data[id].dates.length ) {
         data[id].dates.map((pair,i) =>
         {
-          let newId = +`${id}${i ? i : ''}`
+          let newId = +`${id}${i||''}`
           parsed[newId] = JSON.parse( JSON.stringify( data[id] ) )
           parsed[newId].date_from = pair[0]
           parsed[newId].date_to = pair[1]

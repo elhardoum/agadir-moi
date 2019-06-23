@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native'
 import GestureRecognizer from 'react-native-swipe-gestures'
 import { View as AnimatableView } from 'react-native-animatable'
+import { Button } from 'react-native-material-ui'
 
 export default class LoadingScreen extends Component
 {
@@ -83,9 +84,8 @@ export default class LoadingScreen extends Component
         </View>
 
         {!! dotsLayout && <View style={[styles.skipButtonContainer, {top: dotsLayout.y -10, padding: 10}]}>
-          <TouchableOpacity onPress={e => this.props.state.set({ pastWelcomeScreen: true })} activeOpacity={0.9}>
-            <Text style={styles.skipButton}>{ index === 2 ? i18n('Finish') : i18n('Skip') }</Text>
-          </TouchableOpacity>
+          <Button accent style={{text: styles.skipButton}} text={ index === 2 ? i18n('Finish') : i18n('Skip') }
+            onPress={e => this.props.state.set({ pastWelcomeScreen: true })} />
         </View>}
       </GestureRecognizer>
     )
@@ -146,10 +146,11 @@ const styles = StyleSheet.create({
   skipButtonContainer: {
     position: 'absolute',
     right: 0,
-    marginRight: 25
+    marginRight: 25,
+    marginTop: -9,
   },
   skipButton: {
     color: '#555',
-    textDecorationLine: 'underline',
+    fontWeight: 'normal',
   }
 })
