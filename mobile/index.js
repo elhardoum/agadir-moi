@@ -38,4 +38,4 @@ AppRegistry.registerComponent(appName, () => App)
 import i18n from './src/util/i18n'
 global.i18n = i18n
 
-global.environ = global.environ || require('./env.json')
+global.environ = require('./env.json')

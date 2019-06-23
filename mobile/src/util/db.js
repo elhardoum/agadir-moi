@@ -47,6 +47,7 @@ export const NewsSchema = {
     images: {
       type: 'list', objectType: 'string'
     },
+    originId: 'int',
   }
 }
 
@@ -66,6 +67,7 @@ export const EventsSchema = {
     },
     date_from: 'int?',
     date_to: 'int?',
+    originId: 'int',
   }
 }
 
@@ -256,6 +258,7 @@ class News
         }
 
         for ( let id in data ) {
+          data[id].originId = +id
           let index = saved.findIndex(x => x.id == id)
 
           for ( let key in data[id] ) { // filter out unwanted data
@@ -307,6 +310,7 @@ class Events
 
     for ( let id in data ) {
       if ( data[id].dates.length ) {
+        data[id].originId = +id
         data[id].dates.map((pair,i) =>
         {
           let newId = +`${id}${i||''}`
@@ -350,8 +354,10 @@ class Events
 
           if ( index >= 0 ) { // update existing record
             news[index] = data[id]
+            console.log('update', id, data[id].title)
           } else { // insert new record
             realm.create(EventsSchema.name, data[id])
+            console.log('insert', id, data[id].title)
           }
         }
 

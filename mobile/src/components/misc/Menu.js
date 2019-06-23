@@ -49,7 +49,7 @@ export default class Menu extends Component
               <Image style={styles.buttonImg} source={opt[2]} />
               <Text style={[styles.buttonText, this.isActive(opt[0], {color: '#55d1f3'})]}>{opt[1]}</Text>
             </View>
-          } onPress={e => this.props.pushState(opt[0])} key={i} />)}
+          } onPress={e => (this.props.pushState(opt[0]), this.props.state.set({ isMenuOpen: false }))} key={i} />)}
         </ScrollView>
       </View>
     )

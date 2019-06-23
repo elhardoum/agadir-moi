@@ -4,17 +4,20 @@ global.environ = global.environ || require('./../../env.json')
 
 export default class dataLoader
 {
-  constructor(os)
+  constructor(db)
   {
-    this.db = new db(environ.realm_db_path || 'anotherRealm91.realm')
+    this.db = db
+    this.bootBackgroundAbortCtrls = {}
   }
 
-  async bootBackground()
+  async bootBackground(abortCtls)
   {
     global.metadata = {
       local: await this.db.metadata.getLocal(),
       remote: await this.db.metadata.getRemote(),
     }
+
+    this.bootBackgroundAbortCtrls = abortCtls
 
     let sync_delay = +environ.SYNC_DATA_DELAY_MS || ( (environ.dev ? 2 : 5) * 60 * 1000 )
 
@@ -37,7 +40,9 @@ export default class dataLoader
       if ( ! metadata.local.phones_updated || metadata.remote.phones_updated !== metadata.local.phones_updated ) {
         environ.dev && console.log('updating phones')
 
-        fetch(`${environ.database_url}/posts/phones.json?auth=${environ.database_secret}`)
+        fetch(`${environ.database_url}/posts/phones.json?auth=${environ.database_secret}`, {
+          signal: this.bootBackgroundAbortCtrls.phones.signal
+        })
           .then(r => r.json())
           .then(async data => this.db.phones.persistList(data).then(r =>
             this.db.metadata.setLocal({ phones_updated: metadata.remote.phones_updated || +new Date }).catch(e => environ.dev && console.log(e))).catch(e => undefined))
@@ -47,7 +52,9 @@ export default class dataLoader
       if ( ! metadata.local.news_updated || metadata.remote.news_updated !== metadata.local.news_updated ) {
         environ.dev && console.log('updating news')
 
-        fetch(`${environ.database_url}/posts/news.json?auth=${environ.database_secret}`)
+        fetch(`${environ.database_url}/posts/news.json?auth=${environ.database_secret}`, {
+          signal: this.bootBackgroundAbortCtrls.news.signal
+        })
           .then(r => r.json())
           .then(async data => this.db.news.persistList(data).then(r =>
             this.db.metadata.setLocal({ news_updated: metadata.remote.news_updated || +new Date }).catch(e => environ.dev && console.log(e))).catch(e => undefined))
@@ -57,7 +64,9 @@ export default class dataLoader
       if ( ! metadata.local.events_updated || metadata.remote.events_updated !== metadata.local.events_updated ) {
         environ.dev && console.log('updating events')
 
-        fetch(`${environ.database_url}/posts/events.json?auth=${environ.database_secret}`)
+        fetch(`${environ.database_url}/posts/events.json?auth=${environ.database_secret}`, {
+          signal: this.bootBackgroundAbortCtrls.events.signal
+        })
           .then(r => r.json())
           .then(async data => this.db.events.persistList(data).then(r =>
             this.db.metadata.setLocal({ events_updated: metadata.remote.events_updated || +new Date }).catch(e => environ.dev && console.log(e))).catch(e => undefined))

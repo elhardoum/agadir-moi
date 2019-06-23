@@ -7,30 +7,42 @@ import WelcomeScreen from './misc/WelcomeScreen'
 import AppContent from './misc/AppContent'
 
 import DataLoader from './../util/dataLoader'
-dataLoader = new DataLoader( 'android' )
+import DB from './../util/db'
+
+const db = new DB(environ.realm_db_path || 'dbv13.realm')
+    , dataLoader = new DataLoader(db)
+
+// debugging
+const SKIP_WELCOME = environ.dev, SKIP_LOADING = environ.dev // @todo
 
 export default class App extends Component
 {
-  componentDidMount()
+  async componentDidMount()
   {
-    setTimeout(_ => this.props.state.set({ initialLoaded: true }), 10||2000) // @todo
+    setTimeout(_ => this.props.state.set({ initialLoaded: true }), SKIP_LOADING && 10 || 2000)
 
     // fetch data updates in the background
-    dataLoader.bootBackground()
+    dataLoader.bootBackground({
+      news: new AbortController,
+      events: new AbortController,
+      phones: new AbortController,
+    })
+
+    SKIP_WELCOME && this.props.state.set({ pastWelcomeScreen: true })
   }
 
   render()
   {
     const { initialLoaded=false, pastWelcomeScreen=false } = this.props.state
 
-    this.props.dataLoader = dataLoader
+    const custProps = { dataLoader, db }
 
     return (
       <View style={{ flex: 1 }}>
-        <StatusBar { ...this.props } />
+        <StatusBar { ...this.props } { ... custProps } />
 
-        { !initialLoaded ? <LoadingScreen { ...this.props } /> :
-          ( !pastWelcomeScreen ? <WelcomeScreen { ...this.props } /> : <AppContent { ...this.props } /> ) }
+        { !initialLoaded ? <LoadingScreen { ...this.props } { ...custProps } /> :
+          ( !pastWelcomeScreen ? <WelcomeScreen { ...this.props } { ...custProps } /> : <AppContent { ...this.props } { ...custProps } /> ) }
       </View>
     )
   }
