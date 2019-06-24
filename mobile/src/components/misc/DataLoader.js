@@ -12,8 +12,6 @@ export default class DataLoader extends Component
 
   async bootBackground()
   {
-    console.log('bootBackground')
-
     global.metadata = {
       local: await this.props.db.metadata.getLocal(),
       remote: await this.props.db.metadata.getRemote(),

@@ -5,6 +5,10 @@ import LinearGradient from 'react-native-linear-gradient'
 import { NewsSchema } from './../../util/db'
 import { CachedImage, ImageCacheProvider } from 'react-native-cached-image'
 import Story from './item'
+import moment from 'moment'
+import 'moment/locale/fr'
+
+moment.locale('fr')
 
 const ScreenDimensions = Dimensions.get('window')
 
@@ -166,6 +170,7 @@ export default class News extends Component
         , { post_id } = this.state
         , post = post_id ? (this.state.news||[]).find(x => x.id == post_id) : null
 
+
     return (
       <View style={{ flex: 1, backgroundColor: '#fff' }}>
         <LinearGradient start={{x: 1, y: 0}} end={{x: 0, y: 1}} colors={['#11096c', '#1a5293', '#2297b7']} style={{
@@ -265,7 +270,7 @@ export default class News extends Component
                   textShadowRadius: 10,
                 }}>{item.title}</Text>
 
-                <Text style={{
+                { !!this.selectValue({news: 1, events: 0}) && <Text style={{
                   color: '#fff', fontSize: 13,
                   paddingLeft: 20, paddingRight: 20,
                   paddingBottom: 10,
@@ -274,7 +279,50 @@ export default class News extends Component
                   textShadowColor: '#000',
                   textShadowOffset: {width: -1, height: 1},
                   textShadowRadius: 10,
-                }}>{new Date(item.timeCreated).toLocaleString()}</Text>
+                }}>{moment(item.timeCreated).format('DD MMMM YYYY HH:mm')}</Text> }
+
+                { !!this.selectValue({news: 0, events: 1}) && <Text style={{
+                  color: '#fff', fontSize: 13,
+                  paddingLeft: 20, paddingRight: 20,
+                  paddingBottom: 10,
+                  fontFamily: 'AvantGardeBookBT',
+
+                  textShadowColor: '#000',
+                  textShadowOffset: {width: -1, height: 1},
+                  textShadowRadius: 10,
+                }}>{(() =>
+                  {
+                    let date_from = moment(item.date_from)
+                      , date_to = moment(item.date_to)
+                      , from_m = date_from.format('MMM')
+                      , to_m = date_to.format('MMM')
+                      , from_dm = date_from.format('DD MMM')
+                      , to_dm = date_to.format('DD MMM')
+                      , from_y = date_from.format('YYYY')
+                      , to_y = date_to.format('YYYY')
+                      , date_display
+
+                    switch ( true ) {
+                      case from_dm === to_dm && from_y === to_y:
+                        date_display = `${date_from.format('DD')} ${date_from.format('MMM')} ${date_from.format('YYYY')}`
+                        break
+
+                      case from_m === to_m && from_y === to_y:
+                        date_display = `${date_from.format('DD')}-${date_to.format('DD')} ${date_from.format('MMM')} ${date_from.format('YYYY')}`
+                        break
+
+                      case from_y === to_y:
+                        date_display = `${date_from.format('DD')} ${date_from.format('MMM')} - ${date_to.format('DD')} ${date_to.format('MMM')} ${date_from.format('YYYY')}`
+                        break
+
+                      default:
+                        date_display = `${date_from.format('DD')} ${date_from.format('MMM')} ${date_from.format('YYYY')} - ${date_to.format('DD')} ${date_to.format('MMM')} ${date_to.format('YYYY')}`
+                        break
+                    }
+
+                    return `${date_display} ${date_from.format('HH:mm')}-${date_to.format('HH:mm')}`
+                  })()}</Text>}
+
               </View>
 
               <Button accent text={''} upperCase={false}

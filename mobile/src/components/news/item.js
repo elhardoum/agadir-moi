@@ -4,6 +4,10 @@ import LinearGradient from 'react-native-linear-gradient'
 import { CachedImage, ImageCacheProvider } from 'react-native-cached-image'
 import GestureRecognizer from 'react-native-swipe-gestures'
 import { View as AnimatableView } from 'react-native-animatable'
+import moment from 'moment'
+import 'moment/locale/fr'
+
+moment.locale('fr')
 
 const ScreenDimensions = Dimensions.get('window')
     , SLIDER_HEIGHT = ScreenDimensions.height * .33
@@ -78,13 +82,13 @@ export default class News extends Component
 
     return <View style={styles.contentWrapper}>
       <Text style={styles.postTitle}>{post.title}</Text>
-      <Text style={styles.postDate}>{new Date(post.timeCreated).toLocaleString()}</Text>
+      <Text style={styles.postDate}>{moment(post.timeCreated).format('DD MMMM YYYY HH:mm')}</Text>
       <Text style={styles.postContent}>{post.content}</Text>
     </View>
   }
 }
 
-const styles = StyleSheet.create({
+export const styles = StyleSheet.create({
   container: {
     flex: 1,
     // justifyContent: 'left',
