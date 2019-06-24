@@ -34,5 +34,6 @@ Optional - if time allows
 
 - [ ] onscroll expand/collapse toolbar on news/events by reducing vertical padding gradually.
 - [ ] data sync is done on boot - if user reaches screens before data is initially fetched then abort XHRs and make subsequent ones
+- [ ] news/events single view: queue below index and show/hide elements to preserve browsing state for better reading experience
 
 <!-- and more to come (send help) -->

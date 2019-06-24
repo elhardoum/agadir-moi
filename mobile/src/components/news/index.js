@@ -1,10 +1,17 @@
 import React, { Component } from 'react'
-import { View, Text, ScrollView, ActivityIndicator, Image, FlatList, Dimensions } from 'react-native'
+import { View, Text, ScrollView, ActivityIndicator, Image, FlatList, Dimensions, StatusBar } from 'react-native'
 import { Toolbar, Button } from 'react-native-material-ui'
 import LinearGradient from 'react-native-linear-gradient'
 import { NewsSchema } from './../../util/db'
+import { CachedImage, ImageCacheProvider } from 'react-native-cached-image'
 
 const ScreenDimensions = Dimensions.get('window')
+
+export const PARSE_IMAGES = (item) =>
+{
+  item.images = item.images.map(name => `https://firebasestorage.googleapis.com/v0/b/${environ.firebase_bucket}/o/${encodeURIComponent(name)}?alt=media&token=${environ.firebase_storage_download_token}`)
+  return item
+}
 
 export default class News extends Component
 {
@@ -17,17 +24,35 @@ export default class News extends Component
       categories: null, news: null, category: null, search: null, page: null
     }
 
-    this.ABORT_CONTROLLER = new AbortController
     this.LISTVIEW_REF = null
     this.componentId = 'news'
+    this.INTERVAL_ID = null
   }
 
-  componentDidMount()
+  async componentDidMount()
   {
-    setTimeout(this.loadQueryItems.bind(this), 400)
+    const start = +new Date
+
+    await new Promise(resolve => this.INTERVAL_ID=setInterval(_ =>
+    {
+      const { menuClosed=true } = this.props.state
+
+      if ( menuClosed ) // resolve when the menu is closed
+        return clearInterval(this.INTERVAL_ID), resolve()
+
+      if ( +new Date - start > 1200 ) // can't afford having users wait more than a second
+        return clearInterval(this.INTERVAL_ID), resolve()
+    }, 50))
+
+    setTimeout(this.loadQueryItems.bind(this), 300)
 
     // @todo maybe check on dataLoader.background initial data sync, if failed or delayed then abort and make subsequent query here
     // due to the fact that this is free work, and having 7 days to finish up, let's forget about all of the extra premium features
+  }
+
+  componentWillUnmount()
+  {
+    this.INTERVAL_ID && clearInterval(this.INTERVAL_ID)
   }
 
   getSortBy = () => this.selectValue({ news: 'originId ASC', events: this.state.event_sort_start_date ? 'date_from DESC' : 'originId ASC' })
@@ -45,8 +70,6 @@ export default class News extends Component
       const per_page = environ.posts_per_page || 10, page = Math.max(1, +this.state.page)
       res = realm.objects(this.DB_SCHEMA.name).filtered(`TRUEPREDICATE SORT(${this.getSortBy()})`)
 
-      console.log(this.getSortBy())
-
       if ( category ) {
         res = res.filtered('category=$0', category)
       }
@@ -56,14 +79,8 @@ export default class News extends Component
       }
 
       res = res.slice(0, per_page*page)
-      this.setState({ news: res.map(item => Object.assign({}, item)).map(this.parseImages) })
+      this.setState({ news: res.map(item => Object.assign({}, item)).map(PARSE_IMAGES) })
     }).catch(err => (environ.dev && console.log('err', err), undefined))
-  }
-
-  parseImages(item)
-  {
-    item.images = item.images.map(name => `https://firebasestorage.googleapis.com/v0/b/${environ.firebase_bucket}/o/${encodeURIComponent(name)}?alt=media&token=${environ.firebase_storage_download_token}`)
-    return item
   }
 
   switchCategory(category)
@@ -109,7 +126,7 @@ export default class News extends Component
 
           res = res.slice(per_page*(page-1), per_page*page)
 
-          const newItems = res.map(item => Object.assign({}, item)).map(this.parseImages)
+          const newItems = res.map(item => Object.assign({}, item)).map(PARSE_IMAGES)
 
           this.setState({ page, loading_more: false, end_results: !newItems.length, news: news.concat(newItems) })
         }).catch(err => (environ.dev && console.log('err', err), undefined))
@@ -164,10 +181,15 @@ export default class News extends Component
   render()
   {
     const padY = this.getHeaderYPadding()
+        , { statusBarHeight=24 } = this.props.state
 
     return (
       <View style={{ flex: 1, backgroundColor: '#fff' }}>
-        <LinearGradient start={{x: 1, y: 0}} end={{x: 0, y: 1}} colors={['#11096c', '#1a5293', '#2297b7']}>
+        <LinearGradient start={{x: 1, y: 0}} end={{x: 0, y: 1}} colors={['#11096c', '#1a5293', '#2297b7']} style={{
+          paddingTop: statusBarHeight
+        }}>
+          <StatusBar translucent={true} backgroundColor='transparent' />
+
           <View style={{ paddingTop: 15||padY, paddingBottom: 15||padY, paddingLeft: 10, paddingRight: 10 }}>
             <Toolbar
               leftElement="menu"
@@ -195,7 +217,7 @@ export default class News extends Component
                 },
                 onRightElementPress: ({index}) =>
                 {
-                  !!this.state.event_sort_start_date !== !! index && this.setState({ event_sort_start_date: !!index }, _ => this.applySort())
+                  !!this.state.event_sort_start_date !== !!index && this.setState({ event_sort_start_date: !!index }, _ => this.applySort())
                 },
               }}) }
             />
@@ -232,31 +254,49 @@ export default class News extends Component
             { item.ActivityIndicator ? <ActivityIndicator size="small" color="#55d1f3" style={{ height: 50 }} /> : <View
               style={{ margin: 20, marginTop: index ? 5 : 20, height: 200, flexDirection: 'column' }}>
               
-              <Image
-                source={item.images[0] && {uri: item.images[0]} || require('./../../images/newspaper-default.jpg')}
-                style={{ width: '100%', height: 200, borderRadius: 15, position: 'absolute', left: 0 }} />
+              <ImageCacheProvider
+                urlsToPreload={item.images}>
+                <CachedImage
+                  source={item.images[0] && {uri: item.images[0]} || require('./../../images/newspaper-default.jpg')}
+                  style={{ width: '100%', height: 200, borderRadius: 15, position: 'absolute', left: 0 }} />
+              </ImageCacheProvider>
 
-              <Text style={{
-                color: '#fff', fontWeight: '600',
+              <View style={{
+                position: 'absolute', bottom: 0, width: '100%',
                 backgroundColor: '#0000002b',
                 borderBottomLeftRadius: 15, borderBottomRightRadius: 15,
-                fontSize: 16, width: '100%',
+              }}>
+                <Text style={{
+                  color: '#fff', fontWeight: '600',
+                  fontSize: 16,
 
-                paddingLeft: 20, paddingRight: 20,
-                paddingBottom: 10, paddingTop: 10,
+                  paddingLeft: 20, paddingRight: 20,
+                  paddingBottom: 5, paddingTop: 10,
 
-                textShadowColor: '#000',
-                textShadowOffset: {width: -1, height: 1},
-                textShadowRadius: 10,
+                  textShadowColor: '#000',
+                  textShadowOffset: {width: -1, height: 1},
+                  textShadowRadius: 10,
+                }}>{item.title}</Text>
 
-                position: 'absolute', bottom: 0,
-              }}>{item.title}</Text>
+                <Text style={{
+                  color: '#fff', fontSize: 13,
+                  paddingLeft: 20, paddingRight: 20,
+                  paddingBottom: 10,
 
-              <Button accent
+                  textShadowColor: '#000',
+                  textShadowOffset: {width: -1, height: 1},
+                  textShadowRadius: 10,
+                }}>{new Date(item.timeCreated).toLocaleString()}</Text>
+              </View>
+
+              <Button accent text={''} upperCase={false}
                 style={{container: {
                   position: 'absolute', top: 0, width: '100%', height: '100%', backgroundColor: 'transparent', borderRadius: 15,
                 }}}
-                text={''} upperCase={false} onPress={e => console.log('Load story')} />
+                onPress={e => this.props.pushState({
+                  pathname: this.selectValue({news: `/news/${item.id}`, events: `/events/${item.id}`}),
+                  state: { item }
+                })} />
             </View>}
           </View>}>
         </FlatList>}

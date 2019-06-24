@@ -136,22 +136,11 @@ class MetaData
           key in schema.properties || (delete data[key])
         }
 
-        try { // update
-          let res = realm.objects(schema.name).filtered('_id=1')
+        let model = realm.create(schema.name, {
+          _id: 1, ...data
+        }, true)
 
-          for ( let key in data ) {
-            res[0][key] = data[key]
-          }
-
-          return resolve(Object.assign({}, res[0]))
-        } catch (e) { // insert
-          let model = realm.create(schema.name, {
-            _id: 1,
-            ... data
-          })
-
-          return resolve(Object.assign({}, model))
-        }
+        return resolve(Object.assign({}, model))
       })
     }).catch(err => reject(err)))
   }
@@ -196,17 +185,11 @@ class Phones
         }
 
         for ( let id in data ) {
-          let index = saved.findIndex(x => x.id == id)
-
           for ( let key in data[id] ) { // filter out unwanted data
             key in PhonesSchema.properties || (delete data[id][key])
           }
 
-          if ( index >= 0 ) { // update existing record
-            phones[index] = data[id]
-          } else { // insert new record
-            realm.create(PhonesSchema.name, data[id])
-          }
+          realm.create(PhonesSchema.name, data[id], true)
         }
 
         // purge deleted items
@@ -259,17 +242,12 @@ class News
 
         for ( let id in data ) {
           data[id].originId = +id
-          let index = saved.findIndex(x => x.id == id)
 
           for ( let key in data[id] ) { // filter out unwanted data
             key in NewsSchema.properties || (delete data[id][key])
           }
 
-          if ( index >= 0 ) { // update existing record
-            news[index] = data[id]
-          } else { // insert new record
-            realm.create(NewsSchema.name, data[id])
-          }
+          realm.create(NewsSchema.name, data[id], true)
         }
 
         // purge deleted items
@@ -346,17 +324,11 @@ class Events
         }
 
         for ( let id in data ) {
-          let index = saved.findIndex(x => x.id == id)
-
           for ( let key in data[id] ) { // filter out unwanted data
             key in EventsSchema.properties || (delete data[id][key])
           }
 
-          if ( index >= 0 ) { // update existing record
-            news[index] = data[id]
-          } else { // insert new record
-            realm.create(EventsSchema.name, data[id])
-          }
+          realm.create(EventsSchema.name, data[id], true)
         }
 
         // purge deleted items

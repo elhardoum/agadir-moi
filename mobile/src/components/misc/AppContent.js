@@ -9,7 +9,9 @@ import { NativeRouter, Route, BackButton } from 'react-router-native'
 
 import Home from './../home/'
 import News from './../news/'
+import Story from './../news/item'
 import Events from './../events/'
+// import Event from './../events/item'
 
 const SideMenu = require('react-native-side-menu').default
 const ScreenDimensions = Dimensions.get('window')
@@ -19,12 +21,13 @@ class RenderProxy extends Component
 {
   componentDidMount()
   {
-    ROUTER_REF_HIST_PUSH = this.props.history.push
+    ROUTER_REF_HIST_PUSH = (...args) => (this.props.state.set({isMenuOpen: false}), this.props.history.push(...args))
 
     this.props.state.set({
       router: {
         match: this.props.match
-      }
+      },
+      isMenuOpen: false
     })
   }
 
@@ -46,18 +49,23 @@ export default class AppContent extends Component
       this.state.overlayStateSetter({
         visible: false,
       })
+      false === this.props.state.menuClosed && this.props.state.set({ menuClosed: true })
     } else {
       this.state.overlayStateSetter({
         visible: true,
         opacity: parseFloat( (left / screenWidth).toFixed(3) ),
       })
+      this.props.state.menuClosed && this.props.state.set({ menuClosed: false })
     }
   }
 
   render()
   {
     const { isMenuOpen=false } = this.props.state
-    const pushState = slug => ROUTER_REF_HIST_PUSH && ROUTER_REF_HIST_PUSH(slug)
+
+    const custProps = {
+      pushState: slug => ROUTER_REF_HIST_PUSH && ROUTER_REF_HIST_PUSH(slug)
+    }
 
     return (
       <View style={{ flex: 1, backgroundColor: '#28323e' }}>
@@ -65,14 +73,16 @@ export default class AppContent extends Component
           <BackButton>
             <SideMenu
               onSliding={(left) => this.state.overlayStateSetter && this.onSideMenuMove(left)}
-              menu={<Menu dimensions={ScreenDimensions} {...this.props} pushState={pushState.bind(this)}/>}
+              menu={<Menu dimensions={ScreenDimensions} {...this.props} pushState={custProps.pushState.bind(this)}/>}
               isOpen={ isMenuOpen }
               bounceBackOnOverdraw={ false }
               openMenuOffset={ScreenDimensions.width * 0.85}>
 
-              <Route path='/' exact render={routerProps => <RenderProxy component={Home} {...this.props} {...routerProps} />} />
-              <Route path='/news' render={routerProps => <RenderProxy component={News} {...this.props} {...routerProps} />} />
-              <Route path='/events' render={routerProps => <RenderProxy component={Events} {...this.props} {...routerProps} />} />
+              <Route path='/' exact render={routerProps => <RenderProxy component={Home} {...this.props} {...routerProps} {...custProps} />} />
+              <Route path='/news' exact render={routerProps => <RenderProxy component={News} {...this.props} {...routerProps} {...custProps} />} />
+              <Route path='/events' exact render={routerProps => <RenderProxy component={Events} {...this.props} {...routerProps} {...custProps} />} />
+              <Route path='/news/:id' exact render={routerProps => <RenderProxy component={Story} {...this.props} {...routerProps} {...custProps} />} />
+              {/*<Route path='/events/:id' exact render={routerProps => <RenderProxy component={Event} {...this.props} {...routerProps} {...custProps} />} />*/}
 
               <MenuOverlay { ...this.props } captureStateSetter={overlayStateSetter => this.setState({ overlayStateSetter })} />
             </SideMenu>
