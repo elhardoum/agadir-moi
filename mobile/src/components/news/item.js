@@ -1,11 +1,12 @@
 import React, { Component } from 'react'
-import { View, Text, ActivityIndicator, Image, StatusBar, ScrollView, StyleSheet, Dimensions, TouchableOpacity } from 'react-native'
-import { Toolbar } from 'react-native-material-ui'
+import { View, Text, ActivityIndicator, Image, ScrollView, StyleSheet, Dimensions, TouchableOpacity } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
 import { CachedImage, ImageCacheProvider } from 'react-native-cached-image'
 import GestureRecognizer from 'react-native-swipe-gestures'
+import { View as AnimatableView } from 'react-native-animatable'
 
 const ScreenDimensions = Dimensions.get('window')
+    , SLIDER_HEIGHT = ScreenDimensions.height * .33
 
 export default class News extends Component
 {
@@ -14,67 +15,22 @@ export default class News extends Component
     super(props)
     this.state = {}
     this.componentId = 'news'
-  }
-
-  componentDidMount()
-  {
-    const { id } = (this.props.match||{}).params || {}
-        , { item: post } = this.props.location.state || {}
-
-    this.setState({ post, id: +id })
+    this.REF_ANIMATABLE_VIEW = null
   }
 
   selectValue = ({ news, events }) => ({news, events}[this.componentId])
 
+  animateActiveImage()
+  {
+    this.REF_ANIMATABLE_VIEW && this.REF_ANIMATABLE_VIEW.fadeOut(500).then(this.REF_ANIMATABLE_VIEW.fadeIn(500))
+  }
+
   render()
   {
-    const { post, id } = this.state
-
-    const sliderOverlayColors = [
-      'rgba(0, 0, 0, 0.12156862745098039)',
-      'rgba(0, 0, 0, 0.32941176470588235)',
-      'rgba(0, 0, 0, 0.6392156862745098)',
-    ]
+    const { image_index=0 } = this.state, { post } = this.props
 
     return (
       <View style={{ flex: 1, backgroundColor: '#fff' }}>
-        <LinearGradient start={{x: 1, y: 0}} end={{x: 0, y: 1}} colors={['#11096c', '#1a5293', '#2297b7']}>
-          <StatusBar translucent={true} backgroundColor='transparent' />
-
-          <View style={{ padding: 10, paddingTop: 5, paddingBottom: 5 }}>
-            <Toolbar
-              leftElement="menu"
-              centerElement={ this.selectValue({ news: 'Actualité', events: 'Événement' }) }
-              searchable={{
-                autoFocus: true,
-                placeholder: 'Recherche',
-                onChangeText: text => this.setState({ searchable_text: text }),                
-                onSubmitEditing: _ => this.setState({ search: this.state.searchable_text }, _ => this.applySearch()),
-                onSearchClosed: _ => this.setState({ search: null }, _ => this.applySearch()),
-              }}
-              onLeftElementPress={e => (console.log('open'), this.props.state.set({ isMenuOpen: true }))}
-              style={{
-                container: { backgroundColor: 'transparent' }
-              }}
-              { ...this.selectValue({news: {}, events: {
-                rightElement: {
-                  menu: {
-                    icon: 'more-vert',
-                    labels: [
-                      `${!this.state.event_sort_start_date ? '✓ ' : ''}Trier par date publié`,
-                      `${this.state.event_sort_start_date ? '✓ ' : ''}Trier par date événements`,
-                    ]
-                  }
-                },
-                onRightElementPress: ({index}) =>
-                {
-                  !!this.state.event_sort_start_date !== !!index && this.setState({ event_sort_start_date: !!index }, _ => this.applySort())
-                },
-              }}) }
-            />
-          </View>
-        </LinearGradient>
-
         { undefined === post && <ActivityIndicator size="large" color="#55d1f3" style={{ flex: 1 }} /> }
 
         { undefined !== post && ( ! post || ! post.id ) && <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -84,45 +40,59 @@ export default class News extends Component
         { undefined !== post && post && post.id && <ScrollView style={{flex: 1}}>
 
           <GestureRecognizer style={ styles.container }
-            onSwipeRight={e => console.log('right')}
-            onSwipeLeft={e => console.log('left')}>
+            onSwipeRight={e => this.setState({ image_index: Math.max(0, image_index-1) }, _ => image_index > 0 && this.animateActiveImage())}
+            onSwipeLeft={e => this.setState({ image_index: Math.min(post.images.length-1, image_index+1) }, _ =>
+              image_index < post.images.length-1 && this.animateActiveImage())}>
 
-            { post.images && post.images.length ? <ImageCacheProvider
-              urlsToPreload={post.images||[]}>
-              <CachedImage
-                source={post.images[0] && {uri: post.images[0]}} style={styles.image} />
-            </ImageCacheProvider> : <CachedImage
-              source={require('./../../images/newspaper-default.jpg')} style={styles.image} /> }
+            <AnimatableView ref={r => this.REF_ANIMATABLE_VIEW = r} style={{ flex: 1, alignItems: 'flex-start', backgroundColor: '#555' }}>
+              { post.images && post.images.length ? <ImageCacheProvider
+                urlsToPreload={post.images||[]}>
+                <CachedImage source={post.images[image_index] && {uri: post.images[image_index]}} style={styles.image} />
+              </ImageCacheProvider> : <CachedImage
+                source={require('./../../images/newspaper-default.jpg')} style={styles.image} /> }
+            </AnimatableView>
 
-            <LinearGradient  colors={sliderOverlayColors} style={styles.dotWrapper}>
-
-              <View style={ styles.dotWrapperInner }>
+            <LinearGradient colors={this.props.overlayGradients} style={styles.dotWrapper}>
+              <View style={[styles.dotWrapperInner, this.selectValue({
+                news: { bottom: 20 }, events: { bottom: 30 }
+              })]}>
                 { post.images.map((img, index) => <TouchableOpacity key={index} style={styles.dotButton} onPress={e => this.setState(
-                  { index }, _ => index !== 0 && false/*animate*/
+                  { image_index: index }, _ => index !== image_index && this.animateActiveImage()
                 )} activeOpacity={0.9}>
-                  <View style={[styles.dot, 0 == index && styles.dotActive ]}></View>
+                  <View style={[styles.dot, image_index == index && styles.dotActive, index && {marginLeft: 8} ]}></View>
                 </TouchableOpacity>) }
               </View>
-
             </LinearGradient>
-
           </GestureRecognizer>
+
+          {this.content()}
 
         </ScrollView> }
       </View>
     )
+  }
+
+  content()
+  {
+    const { post } = this.props
+
+    return <View style={styles.contentWrapper}>
+      <Text style={styles.postTitle}>{post.title}</Text>
+      <Text style={styles.postDate}>{new Date(post.timeCreated).toLocaleString()}</Text>
+      <Text style={styles.postContent}>{post.content}</Text>
+    </View>
   }
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    // justifyContent: 'left',
+    // alignItems: 'left',
   },
   image: {
     width: '100%',
-    height: ScreenDimensions.height * .33,
+    height: SLIDER_HEIGHT,
   },
   dotWrapper: {
     flexDirection: 'row',
@@ -140,19 +110,50 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     flexDirection: 'row',
     flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   dotButton: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    // flex: 1,
+    // justifyContent: 'center',
+    // alignItems: 'center',
   },
   dot: {
     height: 4,
     width: 22,
     backgroundColor: '#fff',
-    marginRight: 10,
   },
   dotActive: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#55d1f3',
+  },
+  contentWrapper: {
+    flex: 1,
+    borderWidth: 2,
+    borderColor: '#eae9e5',
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    marginTop: -15,
+    marginRight: 2,
+    marginLeft: 2,
+    padding: 30,
+  },
+  postTitle: {
+    color: '#197cce',
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 5,
+    fontFamily: 'AvantGardeBookBT',
+  },
+  postDate: {
+    color: '#688085',
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 15,
+    fontFamily: 'AvantGardeBookBT',
+  },
+  postContent: {
+    color: '#6e8085',
+    fontSize: 15,
+    fontFamily: 'AvantGardeBookBT',
   },
 })

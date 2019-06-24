@@ -39,3 +39,13 @@ import i18n from './src/util/i18n'
 global.i18n = i18n
 
 global.environ = require('./env.json')
+
+// global helpers
+global.objPluck = (obj, props=[]) =>
+{
+  const ret = {}
+  for ( let prop in obj ) {
+    (! props.length || props.indexOf(prop) >= 0) && (ret[prop]=obj[prop])
+  }
+  return ret
+}

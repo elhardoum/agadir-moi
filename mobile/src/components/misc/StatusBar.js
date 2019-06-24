@@ -23,6 +23,9 @@ export default class StatusBar extends Component
     switch ( true ) {
       case ['/news', '/events'].indexOf(router_path) >= 0:
         return null
+
+      case initialLoaded && pastWelcomeScreen: // for all 404 pages
+        return null
     }
 
     return (

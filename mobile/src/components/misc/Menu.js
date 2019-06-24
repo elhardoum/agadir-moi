@@ -70,13 +70,14 @@ const styles = StyleSheet.create({
   logoImg: {
     height: 60,
     width: 60,
-    borderRadius: 50,
-    backgroundColor: '#fff'
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    marginTop: 15,
   },
   logoText: {
     color: '#fff',
     marginTop: 10,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   buttonsContainer: {
     paddingTop: 10,
@@ -101,9 +102,9 @@ const styles = StyleSheet.create({
     marginRight: 40,
   },
   buttonText: {
-    flexDirection:'column',
+    flexDirection: 'column',
     color: '#555',
-    fontWeight: 'bold',
     fontSize: 15,
+    fontFamily: 'AvantGardeBookBT',
   },
 })

@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { EventsSchema } from './../../util/db'
 import News from './../news/'
+import Event from './item'
 
 export default class Events extends News
 {
@@ -9,5 +10,6 @@ export default class Events extends News
     super(props)
     this.DB_SCHEMA = EventsSchema
     this.componentId = 'events'
+    this.Single = Event
   }
 }

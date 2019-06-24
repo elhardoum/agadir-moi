@@ -4,8 +4,15 @@ import { Toolbar, Button } from 'react-native-material-ui'
 import LinearGradient from 'react-native-linear-gradient'
 import { NewsSchema } from './../../util/db'
 import { CachedImage, ImageCacheProvider } from 'react-native-cached-image'
+import Story from './item'
 
 const ScreenDimensions = Dimensions.get('window')
+
+export const imageOverlayGradients = [
+  'rgba(0, 0, 0, 0.12156862745098039)',
+  'rgba(0, 0, 0, 0.32941176470588235)',
+  'rgba(0, 0, 0, 0.6392156862745098)',
+]
 
 export const PARSE_IMAGES = (item) =>
 {
@@ -19,6 +26,7 @@ export default class News extends Component
   {
     super(props)
     this.DB_SCHEMA = NewsSchema
+    this.Single = Story
 
     this.state = {
       categories: null, news: null, category: null, search: null, page: null
@@ -27,6 +35,7 @@ export default class News extends Component
     this.LISTVIEW_REF = null
     this.componentId = 'news'
     this.INTERVAL_ID = null
+    this.LISTVIEW_SCROLL = null
   }
 
   async componentDidMount()
@@ -50,6 +59,21 @@ export default class News extends Component
     // due to the fact that this is free work, and having 7 days to finish up, let's forget about all of the extra premium features
   }
 
+  componentWillReceiveProps(props)
+  {
+    const { post_id } = this.state
+
+    let id
+    try { id = +(this.props.history.location.hash||'').match(/id\=(\d+)/i)[1] } catch(e) {}
+    this.setState({ post_id: id || null }, _ =>
+    {
+      if ( post_id && ! id ) {
+        let { contentOffset: { y=undefined }={} } = this.LISTVIEW_SCROLL || {}
+        y !== undefined && setTimeout(_ => this.LISTVIEW_REF.scrollToOffset({ animated: false, offset: y }))
+      }
+    })
+  }
+
   componentWillUnmount()
   {
     this.INTERVAL_ID && clearInterval(this.INTERVAL_ID)
@@ -64,7 +88,7 @@ export default class News extends Component
     this.props.db.open().then(realm =>
     {
       let res = realm.objects(this.DB_SCHEMA.name).filtered('TRUEPREDICATE DISTINCT(category)')
-        , categories = res.map(item => Object.assign({}, item)).map(c => c.category)
+        , categories = res.map(item => objPluck(item)).map(c => c.category)
       this.setState({ categories })
 
       const per_page = environ.posts_per_page || 10, page = Math.max(1, +this.state.page)
@@ -79,7 +103,7 @@ export default class News extends Component
       }
 
       res = res.slice(0, per_page*page)
-      this.setState({ news: res.map(item => Object.assign({}, item)).map(PARSE_IMAGES) })
+      this.setState({ news: res.map(item => objPluck(item)).map(PARSE_IMAGES) })
     }).catch(err => (environ.dev && console.log('err', err), undefined))
   }
 
@@ -92,12 +116,12 @@ export default class News extends Component
   applySearch()
   {
     const { search } = this.state
-    return this.setState({ search, news: null, end_results: null }, _ => setTimeout(this.loadQueryItems.bind(this), 100))
+    return this.setState({ search, news: null, end_results: null, post: null }, _ => setTimeout(this.loadQueryItems.bind(this), 100))
   }
 
   applySort()
   {
-    return this.setState({ news: null, end_results: null }, _ => setTimeout(this.loadQueryItems.bind(this), 100))
+    return this.setState({ news: null, end_results: null, post: null }, _ => setTimeout(this.loadQueryItems.bind(this), 100))
   }
 
   onItemsListScroll({ layoutMeasurement, contentOffset, contentSize })
@@ -126,62 +150,21 @@ export default class News extends Component
 
           res = res.slice(per_page*(page-1), per_page*page)
 
-          const newItems = res.map(item => Object.assign({}, item)).map(PARSE_IMAGES)
+          const newItems = res.map(item => objPluck(item)).map(PARSE_IMAGES)
 
           this.setState({ page, loading_more: false, end_results: !newItems.length, news: news.concat(newItems) })
         }).catch(err => (environ.dev && console.log('err', err), undefined))
       })
     }
-
-    // attempt 1
-    // const { y } = e.contentOffset, pre = +this.state.scroll_y||0, diff = y - pre, state = {
-    //   scroll_y: y
-    // }
-
-    // if ( diff > 0 ) {
-    //   state.header_pad_y = diff
-
-    //   console.log('deduct pad to', 15 - 1)
-    // }
-
-    // this.setState(state)
-
-
-    // attempt 0
-    // // if ( this.TRIGGERED_SCROLL )
-    // //   return this.TRIGGERED_SCROLL = null
-
-    // // this.TRIGGERED_SCROLL = true
-
-    // const { y } = e.contentOffset, pre = this.getHeaderYPadding()
-
-    // this.setState({ header_pad_y: y }, _ =>
-    // {
-    //   return
-
-    //   const post = this.getHeaderYPadding()
-    //       , diff = Math.floor(Math.max(0, post - pre))
-
-    //   console.log( y, diff, y + diff )
-
-    //   this.LISTVIEW_REF.scrollToOffset({ offset: y + post - pre })
-    // })
-
-    // // this.LISTVIEW_REF.scrollToOffset({ offset: 0 })
-  }
-
-  getHeaderYPadding()
-  {
-    const padYstate = +this.state.header_pad_y
-    return padYstate > 0 ? Math.floor(Math.max(0, 15 - Math.min(15, padYstate))) : 15
   }
 
   selectValue = ({ news, events }) => ({news, events}[this.componentId])
 
   render()
   {
-    const padY = this.getHeaderYPadding()
-        , { statusBarHeight=24 } = this.props.state
+    const { statusBarHeight=24 } = this.props.state
+        , { post_id } = this.state
+        , post = post_id ? (this.state.news||[]).find(x => x.id == post_id) : null
 
     return (
       <View style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -190,10 +173,10 @@ export default class News extends Component
         }}>
           <StatusBar translucent={true} backgroundColor='transparent' />
 
-          <View style={{ paddingTop: 15||padY, paddingBottom: 15||padY, paddingLeft: 10, paddingRight: 10 }}>
+          <View style={{ paddingTop: 15, paddingBottom: 15, paddingLeft: 10, paddingRight: 10 }}>
             <Toolbar
               leftElement="menu"
-              centerElement={ this.selectValue({ news: 'Actualités', events: 'Événements' }) }
+              centerElement={ this.selectValue({ news: post ? 'Actualité' : 'Actualités', events: post ? 'Événement' : 'Événements' }) }
               searchable={{
                 autoFocus: true,
                 placeholder: 'Recherche',
@@ -223,8 +206,7 @@ export default class News extends Component
             />
           </View>
 
-          <ScrollView horizontal={true} style={{}}>
-            
+          { ! post && <ScrollView horizontal={true} style={{}}>
             {(this.state.categories||[]).map((cat,i) => <Button accent key={i}
               style={{text: {
                 color: '#fff', fontWeight: '600'
@@ -235,20 +217,21 @@ export default class News extends Component
               }}}
               text={cat} upperCase={false}
               onPress={e => this.switchCategory(cat)} />)}
-
-          </ScrollView>
+          </ScrollView> }
         </LinearGradient>
 
         { (null === this.state.categories || null === this.state.news)
           && <ActivityIndicator size="large" color="#55d1f3" style={{ flex: 1 }} /> }
         
-        {this.state.news && !!this.state.news.length && <FlatList style={{ flex: 1, backgroundColor: '#f1f1f1' }}
+        {this.state.news && !!this.state.news.length && <FlatList style={{ flex: 1, backgroundColor: '#f1f1f1', ...(post && {
+          display: 'none'
+        }) }}
           data={ (this.state.news || [])
             .concat( ...(this.state.loading_more ? [{ ActivityIndicator: true, id: Number.MAX_SAFE_INTEGER }] : []) )
             .map(data => (data.key=`${data.id}`, data))
           }
           ref={r => this.LISTVIEW_REF = r}
-          onScroll={e => this.onItemsListScroll(e.nativeEvent)}
+          onScroll={({nativeEvent}) => (!post && (this.LISTVIEW_SCROLL=nativeEvent), this.onItemsListScroll(nativeEvent))}
           onChangeVisibleRows={e => console.log('onChangeVisibleRows', e)}
           renderItem={({item, index}) => <View>
             { item.ActivityIndicator ? <ActivityIndicator size="small" color="#55d1f3" style={{ height: 50 }} /> : <View
@@ -261,13 +244,17 @@ export default class News extends Component
                   style={{ width: '100%', height: 200, borderRadius: 15, position: 'absolute', left: 0 }} />
               </ImageCacheProvider>
 
+              <LinearGradient colors={imageOverlayGradients} style={{
+                position: 'absolute', bottom: 0, width: '100%', height: '100%', left: 0, borderRadius: 15,
+              }}></LinearGradient>
+
               <View style={{
                 position: 'absolute', bottom: 0, width: '100%',
-                backgroundColor: '#0000002b',
                 borderBottomLeftRadius: 15, borderBottomRightRadius: 15,
               }}>
                 <Text style={{
-                  color: '#fff', fontWeight: '600',
+                  color: '#fff',
+                  fontFamily: 'AvantGardeBookBT',
                   fontSize: 16,
 
                   paddingLeft: 20, paddingRight: 20,
@@ -282,6 +269,7 @@ export default class News extends Component
                   color: '#fff', fontSize: 13,
                   paddingLeft: 20, paddingRight: 20,
                   paddingBottom: 10,
+                  fontFamily: 'AvantGardeBookBT',
 
                   textShadowColor: '#000',
                   textShadowOffset: {width: -1, height: 1},
@@ -293,17 +281,16 @@ export default class News extends Component
                 style={{container: {
                   position: 'absolute', top: 0, width: '100%', height: '100%', backgroundColor: 'transparent', borderRadius: 15,
                 }}}
-                onPress={e => this.props.pushState({
-                  pathname: this.selectValue({news: `/news/${item.id}`, events: `/events/${item.id}`}),
-                  state: { item }
-                })} />
+                onPress={e => this.props.pushState(`/${this.selectValue({news: 'news', events: 'events'})}#id=${item.id}`)} />
             </View>}
           </View>}>
         </FlatList>}
 
+        { post && <this.Single {...this.props} post={post} overlayGradients={imageOverlayGradients} /> }
+
         {this.state.news && this.state.news.length === 0 && <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <Text>{i18n('Nothing found.')}</Text>
-        </View>}        
+        </View>}
       </View>
     )
   }

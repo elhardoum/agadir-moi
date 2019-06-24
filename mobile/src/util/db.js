@@ -122,7 +122,7 @@ class MetaData
     return this.db.open().then(realm =>
     {
       let res = realm.objects(schema.name).filtered('_id=1')
-      return res[0] && '_id' in res[0] ? Object.assign({}, res[0]) : undefined
+      return res[0] && '_id' in res[0] ? objPluck(res[0]) : undefined
     }).catch(err => (environ.dev && console.log('err', err), undefined))
   }
 
@@ -140,7 +140,7 @@ class MetaData
           _id: 1, ...data
         }, true)
 
-        return resolve(Object.assign({}, model))
+        return resolve(objPluck(model))
       })
     }).catch(err => reject(err)))
   }
@@ -161,7 +161,7 @@ class Phones
         , list = []
 
       for ( let i=0; i<res.length; i++ ) {
-        list.push( Object.assign({}, res[i]) )
+        list.push( objPluck(res[i]) )
       }
 
       return list
@@ -177,7 +177,7 @@ class Phones
         const phones = realm.objects(PhonesSchema.name), saved = [], deleted = []
 
         for ( let i=0; i<phones.length; i++ ) {
-          saved.push( Object.assign({}, phones[i]) )
+          saved.push( objPluck(phones[i]) )
 
           if ( ! ( saved[ saved.length -1 ].id in data ) ) {
             deleted.push(phones[i])
@@ -216,7 +216,7 @@ class News
         , list = []
 
       for ( let i=0; i<res.length; i++ ) {
-        list.push( Object.assign({}, res[i]) )
+        list.push( objPluck(res[i]) )
         list[list.length -1].images && (list[list.length -1].images=[...list[list.length-1].images])
       }
 
@@ -233,7 +233,7 @@ class News
         const news = realm.objects(NewsSchema.name), saved = [], deleted = []
 
         for ( let i=0; i<news.length; i++ ) {
-          saved.push( Object.assign({}, news[i]) )
+          saved.push( objPluck(news[i]) )
 
           if ( ! ( saved[ saved.length -1 ].id in data ) ) {
             deleted.push(news[i])
@@ -274,7 +274,7 @@ class Events
         , list = []
 
       for ( let i=0; i<res.length; i++ ) {
-        let index = list.push( Object.assign({}, res[i]) ) -1
+        let index = list.push( objPluck(res[i]) ) -1
         list[index].images && (list[index].images=[...list[index].images])
       }
 
@@ -316,7 +316,7 @@ class Events
         data = this.parseApiData( data )
 
         for ( let i=0; i<news.length; i++ ) {
-          saved.push( Object.assign({}, news[i]) )
+          saved.push( objPluck(news[i]) )
 
           if ( ! ( saved[ saved.length -1 ].id in data ) ) {
             deleted.push(news[i])
