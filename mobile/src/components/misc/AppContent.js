@@ -10,6 +10,7 @@ import { NativeRouter, Route, BackButton } from 'react-router-native'
 import Error404 from './../misc/Error404'
 import News from './../news/'
 import Events from './../events/'
+import Phones from './../phones/'
 
 const SideMenu = require('react-native-side-menu').default
 const ScreenDimensions = Dimensions.get('window')
@@ -79,8 +80,8 @@ export default class AppContent extends Component
               <Route path='/' exact render={routerProps => <RenderProxy component={Error404} {...this.props} {...routerProps} {...custProps} />} />
               <Route path='/news' exact render={routerProps => <RenderProxy component={News} {...this.props} {...routerProps} {...custProps} />} />
               <Route path='/events' exact render={routerProps => <RenderProxy component={Events} {...this.props} {...routerProps} {...custProps} />} />
+              <Route path='/pratique' exact render={routerProps => <RenderProxy component={Phones} {...this.props} {...routerProps} {...custProps} />} />
 
-              <Route path='/pratique' exact render={routerProps => <RenderProxy component={Error404} {...this.props} {...routerProps} {...custProps} />} />
               <Route path='/map' exact render={routerProps => <RenderProxy component={Error404} {...this.props} {...routerProps} {...custProps} />} />
               <Route path='/complaints' exact render={routerProps => <RenderProxy component={Error404} {...this.props} {...routerProps} {...custProps} />} />
               <Route path='/settings' exact render={routerProps => <RenderProxy component={Error404} {...this.props} {...routerProps} {...custProps} />} />

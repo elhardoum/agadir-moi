@@ -95,7 +95,7 @@ export default class News extends Component
         , categories = res.map(item => objPluck(item)).map(c => c.category)
       this.setState({ categories })
 
-      const per_page = environ.posts_per_page || 10, page = Math.max(1, +this.state.page)
+      const per_page = environ.posts_per_page || 10, page = Math.max(1, +this.state.page||1)
       res = realm.objects(this.DB_SCHEMA.name).filtered(`TRUEPREDICATE SORT(${this.getSortBy()})`)
 
       if ( category ) {
@@ -114,18 +114,18 @@ export default class News extends Component
   switchCategory(category)
   {
     category = this.state.category === category ? null : category
-    return this.setState({ category, news: null, end_results: null }, _ => setTimeout(this.loadQueryItems.bind(this), 100))
+    return this.setState({ category, news: null, end_results: null, page: undefined }, _ => setTimeout(this.loadQueryItems.bind(this), 100))
   }
 
   applySearch()
   {
     const { search } = this.state
-    return this.setState({ search, news: null, end_results: null, post: null }, _ => setTimeout(this.loadQueryItems.bind(this), 100))
+    return this.setState({ search, news: null, end_results: null, post: null, page: undefined }, _ => setTimeout(this.loadQueryItems.bind(this), 100))
   }
 
   applySort()
   {
-    return this.setState({ news: null, end_results: null, post: null }, _ => setTimeout(this.loadQueryItems.bind(this), 100))
+    return this.setState({ news: null, end_results: null, post: null, page: undefined }, _ => setTimeout(this.loadQueryItems.bind(this), 100))
   }
 
   onItemsListScroll({ layoutMeasurement, contentOffset, contentSize })
@@ -141,7 +141,7 @@ export default class News extends Component
 
         this.props.db.open().then(realm =>
         {
-          const per_page = environ.posts_per_page || 10, page = Math.max(1, +this.state.page) +1
+          const per_page = environ.posts_per_page || 10, page = Math.max(1, +this.state.page||1) +1
           let res = realm.objects(this.DB_SCHEMA.name).filtered(`TRUEPREDICATE SORT(${this.getSortBy()})`)
 
           if ( category ) {
@@ -237,7 +237,6 @@ export default class News extends Component
           }
           ref={r => this.LISTVIEW_REF = r}
           onScroll={({nativeEvent}) => (!post && (this.LISTVIEW_SCROLL=nativeEvent), this.onItemsListScroll(nativeEvent))}
-          onChangeVisibleRows={e => console.log('onChangeVisibleRows', e)}
           renderItem={({item, index}) => <View>
             { item.ActivityIndicator ? <ActivityIndicator size="small" color="#55d1f3" style={{ height: 50 }} /> : <View
               style={{ margin: 20, marginTop: index ? 5 : 20, height: 200, flexDirection: 'column' }}>
