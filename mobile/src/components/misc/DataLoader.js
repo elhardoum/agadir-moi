@@ -41,6 +41,10 @@ export default class DataLoader extends Component
       if ( data ) {
         metadata.remote = data
         this.props.db.metadata.setRemote(data)
+        this.props.db.metadata.setLocal({
+          updated: +new Date,
+          ...( data.weather_data && { weather: JSON.stringify(data.weather_data) } ),
+        })
       }
     }
 

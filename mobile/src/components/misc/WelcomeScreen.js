@@ -21,14 +21,19 @@ export default class LoadingScreen extends Component
 
   render()
   {
-    const { index=0, dotsLayout } = this.state
+    const { index=0, dotsLayout } = this.state, finishSlider = _ =>
+    {
+      this.props.state.set({ pastWelcomeScreen: true })
+      // save preference
+      this.props.db.metadata.setLocal({ welcomed: true })
+    }
 
     return (
       <GestureRecognizer style={ styles.container }
         onSwipeRight={e => this.setState({ index: Math.max(0, index-1) }, _ => index > 0 && this.animate())}
         onSwipeLeft={e => this.setState({ index: Math.min(2, index+1) }, _ => {
           index < 2 && this.animate()
-          index >= 2 && this.props.state.set({ pastWelcomeScreen: true })
+          index >= 2 && finishSlider()
         })}>
         <AnimatableView ref={ref => this.REFs.view = ref} style={ styles.container }>
           {(_ => {
@@ -85,7 +90,7 @@ export default class LoadingScreen extends Component
 
         {!! dotsLayout && <View style={[styles.skipButtonContainer, {top: dotsLayout.y -10, padding: 10}]}>
           <Button accent style={{text: styles.skipButton}} text={ index === 2 ? i18n('Finish') : i18n('Skip') }
-            onPress={e => this.props.state.set({ pastWelcomeScreen: true })} />
+            onPress={finishSlider} />
         </View>}
       </GestureRecognizer>
     )

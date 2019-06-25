@@ -9,6 +9,8 @@ export const MetaLocalSchema = {
     phones_updated: 'int?',
     news_updated: 'int?',
     updated: 'int?',
+    welcomed: 'bool?',
+    weather: 'string?',
   }
 }
 

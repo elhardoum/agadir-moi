@@ -43,7 +43,8 @@ export default class Menu extends Component
 
         <ScrollView style={styles.buttonsContainer}>
           {MENU_ITEMS.map((opt,i) => <Button accent upperCase={false} text={''} style={{
-            container: {...styles.button, ...this.isActive(opt[0], styles.buttonActive, {backgroundColor: 'transparent'})},
+            container: {...styles.button, ...this.isActive(opt[0], styles.buttonActive, {backgroundColor: 'transparent'}),
+              ...(i+1 == MENU_ITEMS.length && {marginBottom: 20})},
           }} icon={
             <View style={{ marginRight: 'auto', flexDirection: 'row', flexWrap: 'wrap', marginLeft: 4 }}>
               <Image style={styles.buttonImg} source={opt[2]} />

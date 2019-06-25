@@ -18,9 +18,23 @@ export default class App extends Component
 {
   componentDidMount()
   {
-    setTimeout(_ => this.props.state.set({ initialLoaded: true }), SKIP_LOADING && 10 || 2000)
+    const start = +new Date
 
-    SKIP_WELCOME && this.props.state.set({ pastWelcomeScreen: true })
+    db.metadata.getLocal().then(all =>
+    {
+      const diff = +new Date - start
+      setTimeout(_ => this.props.state.set({
+        initialLoaded: true,
+        pastWelcomeScreen: SKIP_WELCOME || !!(all||{}).welcomed,
+      }), SKIP_LOADING && 10 || Math.max(10, 2000 - diff))
+    }).catch(e =>
+    {
+      const diff = +new Date - start
+      setTimeout(_ => this.props.state.set({
+        initialLoaded: SKIP_LOADING,
+        pastWelcomeScreen: SKIP_WELCOME,
+      }), SKIP_LOADING && 10 || Math.max(10, 2000 - diff))
+    })
   }
 
   render()

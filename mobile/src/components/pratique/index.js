@@ -63,7 +63,7 @@ export default class Pratique extends Component
           </View>
         </LinearGradient>
 
-        <ScrollView style={{ flex: 1, backgroundColor: 'transparent', marginTop: -30 }}>
+        <ScrollView style={{ flex: 1, backgroundColor: 'transparent', marginTop: -30 }} overScrollMode='never'>
           {ITEMS.map((item, index) => <View key={index} style={{
             margin: 10, marginLeft: 30, marginRight: 30, marginTop: 0, backgroundColor: '#fff',
             ...(index == ITEMS.length-1 && { marginBottom: 10 }),
