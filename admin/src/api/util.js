@@ -163,11 +163,12 @@ module.exports = {
     async delete(key)
     {
       const data = await this.getAll()
+      const keys = Array.isArray(key) ? key : [key], data_pre = Object.assign({}, data)
 
-      if ( ! data || ! ( key in data ) )
-        return true
+      data && keys.map(k => delete data[k])
 
-      delete data[key]
+      if ( Object.keys(data).length == Object.keys(data_pre).length )
+        return // nothing deleted
 
       const admin = APP_UTIL.initFirebaseApp(), db = admin.database(), ref = db.ref('posts/metadata')
 

@@ -103,3 +103,6 @@ const http = require('http'), server = http.createServer(async (req, res) =>
 
 server.listen(process.env.PORT||9090, process.env.HOST||'0.0.0.0', _ =>
   console.log(`Server running at http://${process.env.HOST||'0.0.0.0'}:${process.env.PORT||9090}/`))
+
+// schedule cron evetns
+require('./cron')

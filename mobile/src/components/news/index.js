@@ -270,7 +270,7 @@ export default class News extends Component
                   textShadowRadius: 10,
                 }}>{item.title}</Text>
 
-                { !!this.selectValue({news: 1, events: 0}) && <Text style={{
+                { <Text style={{
                   color: '#fff', fontSize: 13,
                   paddingLeft: 20, paddingRight: 20,
                   paddingBottom: 10,
@@ -279,18 +279,7 @@ export default class News extends Component
                   textShadowColor: '#000',
                   textShadowOffset: {width: -1, height: 1},
                   textShadowRadius: 10,
-                }}>{moment(item.timeCreated).format('DD MMMM YYYY HH:mm')}</Text> }
-
-                { !!this.selectValue({news: 0, events: 1}) && <Text style={{
-                  color: '#fff', fontSize: 13,
-                  paddingLeft: 20, paddingRight: 20,
-                  paddingBottom: 10,
-                  fontFamily: 'AvantGardeBookBT',
-
-                  textShadowColor: '#000',
-                  textShadowOffset: {width: -1, height: 1},
-                  textShadowRadius: 10,
-                }}>{(() =>
+                }}>{this.selectValue({news: moment(item.timeCreated).format('DD MMMM YYYY HH:mm'), events: (() =>
                   {
                     let date_from = moment(item.date_from)
                       , date_to = moment(item.date_to)
@@ -321,7 +310,7 @@ export default class News extends Component
                     }
 
                     return `${date_display} ${date_from.format('HH:mm')}-${date_to.format('HH:mm')}`
-                  })()}</Text>}
+                  })()})}</Text>}
 
               </View>
 
