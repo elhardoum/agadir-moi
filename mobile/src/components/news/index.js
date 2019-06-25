@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Text, ScrollView, ActivityIndicator, Image, FlatList, Dimensions, StatusBar } from 'react-native'
+import { View, Text, ScrollView, ActivityIndicator, Image, FlatList, Dimensions, StatusBar, RefreshControl } from 'react-native'
 import { Toolbar, Button } from 'react-native-material-ui'
 import LinearGradient from 'react-native-linear-gradient'
 import { NewsSchema } from './../../util/db'
@@ -107,8 +107,8 @@ export default class News extends Component
       }
 
       res = res.slice(0, per_page*page)
-      this.setState({ news: res.map(item => objPluck(item)).map(PARSE_IMAGES) })
-    }).catch(err => (environ.dev && console.log('err', err), undefined))
+      this.setState({ news: res.map(item => objPluck(item)).map(PARSE_IMAGES), refreshing: false })
+    }).catch(err => (environ.dev && console.log('err', err), this.setState({refreshing: false}), undefined))
   }
 
   switchCategory(category)
@@ -126,6 +126,11 @@ export default class News extends Component
   applySort()
   {
     return this.setState({ news: null, end_results: null, post: null, page: undefined }, _ => setTimeout(this.loadQueryItems.bind(this), 100))
+  }
+
+  onRefresh()
+  {
+    this.setState({ refreshing: true, news: null, end_results: null, post: null, page: undefined }, this.loadQueryItems)
   }
 
   onItemsListScroll({ layoutMeasurement, contentOffset, contentSize })
@@ -169,8 +174,7 @@ export default class News extends Component
     const { statusBarHeight=24 } = this.props.state
         , { post_id } = this.state
         , post = post_id ? (this.state.news||[]).find(x => x.id == post_id) : null
-
-
+  
     return (
       <View style={{ flex: 1, backgroundColor: '#fff' }}>
         <LinearGradient start={{x: 1, y: 0}} end={{x: 0, y: 1}} colors={['#11096c', '#1a5293', '#2297b7']} style={{
@@ -237,6 +241,7 @@ export default class News extends Component
           }
           ref={r => this.LISTVIEW_REF = r}
           onScroll={({nativeEvent}) => (!post && (this.LISTVIEW_SCROLL=nativeEvent), this.onItemsListScroll(nativeEvent))}
+          refreshControl={<RefreshControl refreshing={this.state.refreshing} onRefresh={e => this.onRefresh(e)} />}
           renderItem={({item, index}) => <View>
             { item.ActivityIndicator ? <ActivityIndicator size="small" color="#55d1f3" style={{ height: 50 }} /> : <View
               style={{ margin: 20, marginTop: index ? 5 : 20, height: 200, flexDirection: 'column' }}>

@@ -140,6 +140,7 @@ export const styles = StyleSheet.create({
     marginRight: 2,
     marginLeft: 2,
     padding: 30,
+    marginBottom: 2,
   },
   postTitle: {
     color: '#197cce',

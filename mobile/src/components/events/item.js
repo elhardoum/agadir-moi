@@ -32,7 +32,7 @@ export default class Event extends Story
       date_to = moment(post.date_to).format('YYYY')
     }
 
-    return <View style={{ flex: 1, marginTop: -15 }}>
+    return <View style={{ flex: 1, marginTop: -25 }}>
       <View style={styles.contentWrapper}>
         <Text style={[styles.postTitle, styles.textCenter, {marginBottom: 15}]}>{post.title}</Text>
 

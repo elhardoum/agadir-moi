@@ -4,12 +4,28 @@ import db from './../../util/db'
 
 export default class DataLoader extends Component
 {
+  constructor(props)
+  {
+    super(props)
+    this.SYNC_DELAY = +environ.SYNC_DATA_DELAY_MS || ( (environ.dev ? 2 : 5) * 60 * 1000 )
+    this.UPDATER_ID = null
+  }
+
   componentDidMount()
   {
     // fetch data updates in the background
     this.bootBackground()
+
+    // schedule background data sync
+    this.UPDATER_ID && clearInterval(this.UPDATER_ID)
+    this.UPDATER_ID = setInterval(this.bootBackground.bind(this), this.SYNC_DELAY)
   }
 
+  componentWillUnmount()
+  {
+    this.UPDATER_ID && clearInterval(this.UPDATER_ID)
+  }
+  
   async bootBackground()
   {
     global.metadata = {
@@ -17,9 +33,7 @@ export default class DataLoader extends Component
       remote: await this.props.db.metadata.getRemote(),
     }
 
-    let sync_delay = +environ.SYNC_DATA_DELAY_MS || ( (environ.dev ? 2 : 5) * 60 * 1000 )
-
-    if ( ! metadata.remote || ! metadata.local || +new Date - metadata.local.updated > sync_delay ) {
+    if ( ! metadata.remote || ! metadata.local || +new Date - metadata.local.updated > this.SYNC_DELAY ) {
       let data = await fetch(`${environ.database_url}/posts/metadata.json?auth=${environ.database_secret}`)
         .then(r => r.json())
         .catch(err => (environ.dev && console.log('err', err), undefined))
