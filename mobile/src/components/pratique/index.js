@@ -14,13 +14,13 @@ const ITEMS = [
     title: 'Météo',
     info: 'Lorem ipsum dolor sit amet',
     icon: require('./../../images/mockup-static/iconb-08.png'),
-    route: '/404#weather',
+    route: '/weather',
   },
   {
     title: 'Numéros Utiles',
     info: 'Lorem ipsum dolor sit amet',
     icon: require('./../../images/mockup-static/iconb-08.png'),
-    route: '/pratique/phones',
+    route: '/phones',
   },
   {
     title: 'Encombrants',
@@ -69,7 +69,7 @@ export default class Pratique extends Component
             ...(index == ITEMS.length-1 && { marginBottom: 10 }),
             borderColor: '#e5e5e5', borderWidth: 2, borderRadius: 15, padding: 20, overflow: 'hidden',
             flex: 1, alignItems: 'center', justifyContent: 'center', flexDirection: 'row',
-          }} onLayout={({nativeEvent: {layout: { height, width }}}) => this.setState({ [`height_${index}`]: width, [`width_${index}`]: width })}>
+          }} onLayout={({nativeEvent: {layout: { height, width }}}) => this.setState({ [`height_${index}`]: height, [`width_${index}`]: width })}>
             <Image source={item.icon} style={{
               height: 40, width: 40, marginRight: 20,
             }} />

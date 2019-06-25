@@ -4,6 +4,12 @@ import GestureRecognizer from 'react-native-swipe-gestures'
 import { View as AnimatableView } from 'react-native-animatable'
 import { Button } from 'react-native-material-ui'
 
+const IMAGES = [
+  require('./../../images/splash-screen-01.png'),
+  require('./../../images/splash-screen-02.png'),
+  require('./../../images/splash-screen-03.png'),
+]
+
 export default class LoadingScreen extends Component
 {
   state = {}
@@ -36,24 +42,7 @@ export default class LoadingScreen extends Component
           index >= 2 && finishSlider()
         })}>
         <AnimatableView ref={ref => this.REFs.view = ref} style={ styles.container }>
-          {(_ => {
-            switch(index) {
-              case 1:
-                return <Image
-                  style={ styles.headerImage }
-                  source={ require('./../../images/splash-screen-03.png') } />
-
-              case 2:
-                return <Image
-                  style={ styles.headerImage }
-                  source={ require('./../../images/splash-screen-02.png') } />
-
-              default:
-                return <Image
-                  style={ styles.headerImage }
-                  source={ require('./../../images/splash-screen-01.png') } />
-            }
-          })()}
+          <Image style={ styles.headerImage } source={IMAGES[index]} />
 
           <Text style={ [styles.title, styles.paddingSides] }>
             {['Lorem Ipsum', 'Dolor Sit Amet', 'Consectetur Adipisicing Truck'][index]}
