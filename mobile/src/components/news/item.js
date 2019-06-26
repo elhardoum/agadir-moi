@@ -10,7 +10,7 @@ import 'moment/locale/fr'
 moment.locale('fr')
 
 const ScreenDimensions = Dimensions.get('window')
-    , SLIDER_HEIGHT = ScreenDimensions.height * .33
+    , SLIDER_HEIGHT = ScreenDimensions.height * .40
 
 export default class News extends Component
 {
@@ -52,15 +52,14 @@ export default class News extends Component
               { post.images && post.images.length ? <ImageCacheProvider
                 urlsToPreload={post.images||[]}>
                 <CachedImage source={post.images[image_index] && {uri: post.images[image_index]}} style={styles.image} />
-              </ImageCacheProvider> : <CachedImage
-                source={require('./../../images/newspaper-default.jpg')} style={styles.image} /> }
+              </ImageCacheProvider> : <CachedImage source={require('./../../images/newspaper-default.jpg')} style={styles.image} /> }
             </AnimatableView>
 
             <LinearGradient colors={this.props.overlayGradients} style={styles.dotWrapper}>
               <View style={[styles.dotWrapperInner, this.selectValue({
                 news: { bottom: 20 }, events: { bottom: 30 }
               })]}>
-                { post.images.map((img, index) => <TouchableOpacity key={index} style={styles.dotButton} onPress={e => this.setState(
+                { post.images.length > 1 && post.images.map((img, index) => <TouchableOpacity key={index} style={styles.dotButton} onPress={e => this.setState(
                   { image_index: index }, _ => index !== image_index && this.animateActiveImage()
                 )} activeOpacity={0.9}>
                   <View style={[styles.dot, image_index == index && styles.dotActive, index && {marginLeft: 8} ]}></View>
@@ -137,10 +136,10 @@ export const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 20,
     marginTop: -15,
-    marginRight: 2,
-    marginLeft: 2,
+    // marginRight: 2,
+    // marginLeft: 2,
+    // marginBottom: 2,
     padding: 30,
-    marginBottom: 2,
   },
   postTitle: {
     color: '#197cce',

@@ -35,6 +35,26 @@ export default class App extends Component
         pastWelcomeScreen: SKIP_WELCOME,
       }), SKIP_LOADING && 10 || Math.max(10, 2000 - diff))
     })
+
+    this.getCurrentWeather()
+  }
+
+  async getCurrentWeather()
+  {
+    let weather
+
+    while ( true ) {
+      const data = (await db.metadata.getLocal().catch(err => null)) || {}
+
+      if ( data && data.weather ) {
+        weather = JSON.parse(data.weather)
+        break
+      }
+
+      await new Promise(res => setTimeout(res, 1000))
+    }
+
+    this.props.state.set({ weather: weather }, this.updateWeatherState)
   }
 
   render()

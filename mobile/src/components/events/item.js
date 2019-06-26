@@ -37,7 +37,7 @@ export default class Event extends Story
         <Text style={[styles.postTitle, styles.textCenter, {marginBottom: 15}]}>{post.title}</Text>
 
         <View style={styles.location}>
-          <Image source={require('./../../images/mockup-static/apps_final-07-11.png')} style={styles.locationIcon} />
+          <Image source={require('./../../images/apps_final-07-11.png')} style={styles.locationIcon} />
           <TouchableHighlight>
             <Text style={styles.locationText} onPress={e => this.openMap(post.location)}>{post.location}</Text>
           </TouchableHighlight>
@@ -47,7 +47,7 @@ export default class Event extends Story
 
         <View style={styles.dateWrapper}>
           <View style={styles.dateSection}>
-            <Image source={require('./../../images/mockup-static/apps_final-07-12.png')} style={styles.dateIcon} />
+            <Image source={require('./../../images/apps_final-07-12.png')} style={styles.dateIcon} />
             <View styles={styles.dateDisplay}>
               <Text style={styles.dateDisplayItem}>{date_from}</Text>
               <Text style={styles.dateDisplayItem}>{date_to}</Text>
@@ -55,7 +55,7 @@ export default class Event extends Story
           </View>
 
           <View style={styles.dateSection}>
-            <Image source={require('./../../images/mockup-static/apps_final-07-13.png')} style={styles.dateIcon} />
+            <Image source={require('./../../images/apps_final-07-13.png')} style={styles.dateIcon} />
             <View styles={styles.dateDisplay}>
               <Text style={styles.dateDisplayItem}>{time_from}</Text>
               <Text style={styles.dateDisplayItem}>{time_to}</Text>

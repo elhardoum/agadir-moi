@@ -24,15 +24,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logo: {
-    height: 150,
-    width: 150
+    height: 120,
+    width: 120,
   },
   logoLabel: {
     alignSelf: 'center',
     color: '#fff',
     textTransform: 'uppercase',
-    fontWeight: '600',
+    // fontWeight: '600',
+    fontFamily: 'AvantGardeBookBT',
     fontSize: 20,
-    marginTop: 10
+    marginTop: 12,
   }
 })

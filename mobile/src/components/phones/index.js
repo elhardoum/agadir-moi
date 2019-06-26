@@ -196,7 +196,7 @@ export default class Phones extends Component
                 flexDirection: 'row',
                 marginTop: 10,
               }}>
-                <Image source={require('./../../images/mockup-static/apps_final-07-03.png')} style={{
+                <Image source={require('./../../images/apps_final-07-03.png')} style={{
                   height: 20, width: 20, marginRight: 10,
                 }} />
                 <Text style={{ color: '#677e83', fontSize: 16, fontFamily: 'AvantGardeBookBT', fontWeight: '600' }}>{item.number}</Text>

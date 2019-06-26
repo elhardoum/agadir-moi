@@ -1,7 +1,12 @@
 const MESSAGES = {
   default: {
     fr: {
-      name: 'nom'
+      'About The Event': 'A propos de l\'événement',
+      'Finish': 'terminer',
+      'Skip': 'Sauter',
+      'Nothing found': 'Rien n\'a été trouvé',
+      'This story does not exist': 'Cette histoire n\'existe pas',
+      'This event does not exist': 'Cet événement n\'existe pas',
     }
   },
 }

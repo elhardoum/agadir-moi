@@ -45,14 +45,14 @@ export default class LoadingScreen extends Component
           <Image style={ styles.headerImage } source={IMAGES[index]} />
 
           <Text style={ [styles.title, styles.paddingSides] }>
-            {['Lorem Ipsum', 'Dolor Sit Amet', 'Consectetur Adipisicing Truck'][index]}
+            {['Encombrant', 'Déchet', 'Signaler sur l’espace publique'][index]}
           </Text>
 
           <Text style={ [styles.description, styles.paddingSides] }>
             {[
-              'Lorem ipsum dolor sit truck amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-              'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-              'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
+              'Pour faire disparaitre vous anciens meuble et encombrant.',
+              'Pour rendre votre espace propre.',
+              'Pour avoir une ville magnifique.',
             ][index]}
           </Text>
         </AnimatableView>
@@ -103,6 +103,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: '#555',
     marginBottom: 10,
+    fontFamily: 'AvantGardeBookBT',
   },
   description: {
     alignSelf: 'center',
@@ -111,6 +112,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     marginTop: 10,
     color: '#666',
+    fontFamily: 'AvantGardeBookBT',
   },
   paddingSides: {
     paddingLeft: 25,

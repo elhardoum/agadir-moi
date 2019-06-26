@@ -5,7 +5,7 @@ import Menu from './Menu'
 import MenuOverlay from './MenuOverlay'
 import StatusBar from './StatusBar'
 
-import { NativeRouter, Route, BackButton } from 'react-router-native'
+import { NativeRouter, Route, BackButton, Redirect } from 'react-router-native'
 
 import Error404 from './../misc/Error404'
 import News from './../news/'
@@ -79,7 +79,7 @@ export default class AppContent extends Component
               bounceBackOnOverdraw={ false }
               openMenuOffset={ScreenDimensions.width * 0.85}>
 
-              <Route path='/' exact render={routerProps => <RenderProxy component={News} {...this.props} {...routerProps} {...custProps} />} />
+              <Redirect from='/' to='/news' />
               <Route path='/news' exact render={routerProps => <RenderProxy component={News} {...this.props} {...routerProps} {...custProps} />} />
               <Route path='/events' exact render={routerProps => <RenderProxy component={Events} {...this.props} {...routerProps} {...custProps} />} />
               <Route path='/pratique' exact render={routerProps => <RenderProxy component={Pratique} {...this.props} {...routerProps} {...custProps} />} />

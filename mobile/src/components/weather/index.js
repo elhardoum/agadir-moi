@@ -3,6 +3,8 @@ import { View, Text, StatusBar, StyleSheet } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
 import { Toolbar, Button } from 'react-native-material-ui'
 import Icon from './../misc/Icon'
+import { View as AnimatableView } from 'react-native-animatable'
+import GestureRecognizer from 'react-native-swipe-gestures'
 import moment from 'moment'
 import 'moment/locale/fr'
 
@@ -15,6 +17,8 @@ export default class Weather extends Component
   state = {
     days: [...new Array(5)].map((n,i) => moment().add(i,'days').format()),
   }
+
+  REF_ANIMATABLE_VIEW = null
 
   async componentDidMount()
   {
@@ -140,6 +144,8 @@ export default class Weather extends Component
     return parseFloat(parseFloat(value).toFixed(postdecimal))
   }
 
+  animate = _ => this.REF_ANIMATABLE_VIEW && this.REF_ANIMATABLE_VIEW.fadeOut(500).then(this.REF_ANIMATABLE_VIEW.fadeIn(500))
+
   render()
   {
     const { statusBarHeight=24 } = this.props.state
@@ -166,40 +172,44 @@ export default class Weather extends Component
             />
           </View>
 
-          <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'space-between' }}>
-            <View style={styles.headerCityWrap}>
-              <Text style={styles.headerCity}>AGADIR</Text>
-              <Text style={[styles.headerCitySub, {textTransform:'capitalize'}]}>{dayDisplay}</Text>
-            </View>
-
-            <View>
-              <Icon name={weatherIcon ? `wi${weatherIcon}` : 'wi01d'} height="150" width="150" fill="#fff" style={styles.headerIcon} />
-            </View>
-
-            <View style={styles.metaWrap}>
-              <View style={styles.metaMetric}>
-                <Icon name='Temperature' height="15" width="15" fill="#fff" style={styles.metaIcon} />
-                <Text style={styles.metaNumber}>{temp||'?'}</Text>
-                <Text style={styles.metaUnit}>°c</Text>
+          <GestureRecognizer style={{flex:1}}
+            onSwipeRight={e => this.setState({ dayIndex: Math.max(0, dayIndex-1) }, _ => dayIndex > 0 && this.animate())}
+            onSwipeLeft={e => this.setState({ dayIndex: Math.min(4, dayIndex+1) }, _ => dayIndex < 4 && this.animate())}>
+            <AnimatableView ref={r => this.REF_ANIMATABLE_VIEW = r} style={{ flex: 1, flexDirection: 'column', justifyContent: 'space-between' }}>
+              <View style={styles.headerCityWrap}>
+                <Text style={styles.headerCity}>AGADIR</Text>
+                <Text style={[styles.headerCitySub, {textTransform:'capitalize'}]}>{dayDisplay}</Text>
               </View>
 
-              <View style={styles.metaDivider}></View>
-
-              <View style={styles.metaMetric}>
-                <Icon name='Humidity' height="15" width="15" fill="#fff" style={styles.metaIcon} />
-                <Text style={styles.metaNumber}>{humid||'?'}</Text>
-                <Text style={styles.metaUnit}>%</Text>
+              <View>
+                <Icon name={weatherIcon ? `wi${weatherIcon}` : 'wi01d'} height="150" width="150" fill="#fff" style={styles.headerIcon} />
               </View>
 
-              <View style={styles.metaDivider}></View>
+              <View style={styles.metaWrap}>
+                <View style={styles.metaMetric}>
+                  <Icon name='Temperature' height="15" width="15" fill="#fff" style={styles.metaIcon} />
+                  <Text style={styles.metaNumber}>{temp||'?'}</Text>
+                  <Text style={styles.metaUnit}>°c</Text>
+                </View>
 
-              <View style={styles.metaMetric}>
-                <Icon name='Wind' height="15" width="15" fill="#fff" style={styles.metaIcon} />
-                <Text style={styles.metaNumber}>{wind||'?'}</Text>
-                <Text style={[styles.metaUnit, {fontSize:14}]}>M/S</Text>
+                <View style={styles.metaDivider}></View>
+
+                <View style={styles.metaMetric}>
+                  <Icon name='Humidity' height="15" width="15" fill="#fff" style={styles.metaIcon} />
+                  <Text style={styles.metaNumber}>{humid||'?'}</Text>
+                  <Text style={styles.metaUnit}>%</Text>
+                </View>
+
+                <View style={styles.metaDivider}></View>
+
+                <View style={styles.metaMetric}>
+                  <Icon name='Wind' height="15" width="15" fill="#fff" style={styles.metaIcon} />
+                  <Text style={styles.metaNumber}>{wind||'?'}</Text>
+                  <Text style={[styles.metaUnit, {fontSize:14}]}>M/S</Text>
+                </View>
               </View>
-            </View>
-          </View>
+            </AnimatableView>
+          </GestureRecognizer>
         </LinearGradient>
 
         <View style={styles.daysSlider} onLayout={({nativeEvent: {layout: { height }}}) => this.setState({ daysSliderHeight: height })}>
@@ -212,7 +222,7 @@ export default class Weather extends Component
               style={{container: {
                 position: 'absolute', top: 0, left: 0, backgroundColor: 'transparent',
                 height: this.state.daysSliderHeight || '100%', width: '100%',
-              }}} onPress={e => this.setState({ dayIndex: i })} />
+              }}} onPress={e => this.setState({ dayIndex: i }, i !== dayIndex ? this.animate : _ => 1)} />
           </View>)}
         </View>
       </View>
