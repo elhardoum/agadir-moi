@@ -43,7 +43,7 @@ export default class DataLoader extends Component
         this.props.db.metadata.setRemote(data)
         this.props.db.metadata.setLocal({
           updated: +new Date,
-          ...( data.weather_data && { weather: JSON.stringify(data.weather_data) } ),
+          ...( data.weather_data && { weather: JSON.stringify({ data: data.weather_data, current: data.weather_current || null }) } ),
         })
       }
     }

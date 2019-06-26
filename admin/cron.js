@@ -25,9 +25,14 @@
   }
 })([
   {
-    task: 'fetch-weather-api',
+    id: 'fetch-weather-api',
     repeat_ms: 1 *60 *60 *1000, // every 1 hour (although the weather is updated each 3 hours)
     callback: _ => require('./src/cron/weather')()
+  },
+  {
+    id: 'fetch-weather-api-current',
+    repeat_ms: 10 *60 *1000, // every 10 minutes
+    callback: _ => require('./src/cron/weather.current')()
   }
 ], {
   requests_loop_delay_ms: 60 *1000, // 1 minute, simulating linux cron

@@ -31,7 +31,7 @@ export default class Weather extends Component
       await new Promise(res => setTimeout(res, 1000))
     }
 
-    this.setState({ weather }, this.updateWeatherState)
+    this.setState({ weather: weather.data, current: weather.current }, this.updateWeatherState)
   }
 
   updateWeatherState()
@@ -78,10 +78,19 @@ export default class Weather extends Component
 
   todaysMetrics()
   {
-    let { weather=[] } = this.state
+    let { weather=[], current={} } = this.state
       , date = moment(+new Date).format('YYYY-MM-DD')
       , data = weather.filter(x => x.dt_txt.startsWith(date))[0] || {}
-      , main = data.main || {}
+
+    if ( (current||{}).dt ) {
+      let date_current = moment(current.dt * 1000).format('YYYY-MM-DD')
+
+      if ( date_current == date ) {
+        data = current
+      }
+    }
+
+    let main = data.main || {}
       , temp = numeric(main.temp) ? main.temp : null
       , humid = numeric(main.humidity) ? main.humidity : '?'
       , wind = (data.wind||{}).speed || null
