@@ -1,3 +1,71 @@
+### Admin install
+
+```shell
+# clone the repo
+git clone https://github.com/elhardoum/agadir-moi && cd agadir-moi
+
+# setup environment variables
+mv .env.sample && $EDITOR .env
+
+# regenerate JWT signing keys
+cd admin/src/pem && rm *
+ssh-keygen # make sure the filename is auth_rsa
+
+# convert the pub key to pem format
+ssh-keygen -f auth_rsa.pub -e -m pem > auth_rsa.pem.pub && mv auth_rsa.pem.pub auth_rsa.pub
+
+# to setup the database, run the docker containers
+docker-compose up -d
+
+# ssh into postgres container
+docker-compose exec postgres sh
+
+# switch user
+su -u postgres 
+
+# create db/user
+createuser agadirmoi; createdb agadirmoi
+
+# log into psql interactive shell
+psql -U postgres
+
+# setup user and privileges
+grant all privileges on database agadirmoi to agadirmoi
+alter user agadirmoi with encrypted password 'agadirmoi'
+
+# now exit psql, login again as agadirmoi user
+psql -U agadirmoi
+
+# setup tables: execute the content of `admin/db.sql`
+# ..
+
+# reboot containers
+docker-compose down; docker-compose up -d
+```
+
+### Mobile app development
+
+```shell
+cd mobile
+
+# setup env
+mv env.sample.json env.json && $EDITOR $_
+
+# install dependencies
+npm install
+
+# setup android project
+react-native eject
+
+# link dependencies
+react-native link
+
+# start the app
+react-native run-android
+```
+
+## Todo
+
 ## Backend - administration UI
 
 - [x] Docker dev structure

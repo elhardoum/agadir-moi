@@ -5,7 +5,6 @@ import { Button } from 'react-native-material-ui'
 import Icon from './Icon'
 
 export const MENU_ITEMS = [
-  ['/', 'Acceuil', require('./../../images/mockup-static/apps_final-07-06.png')],
   ['/news', 'Actualités', require('./../../images/mockup-static/apps_final-07-04.png')],
   ['/events', 'Événements', require('./../../images/mockup-static/apps_final-07-06.png')],
   ['/pratique', 'Pratique', require('./../../images/mockup-static/apps_final-07-03.png')],
