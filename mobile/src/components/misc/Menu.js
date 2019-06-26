@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { ScrollView, Text, View, Image, StyleSheet, TouchableHighlight } from 'react-native'
 import { Link } from 'react-router-native'
 import { Button } from 'react-native-material-ui'
-import Icon from './../util/Icon'
+import Icon from './Icon'
 
 export const MENU_ITEMS = [
   ['/', 'Acceuil', require('./../../images/mockup-static/apps_final-07-06.png')],

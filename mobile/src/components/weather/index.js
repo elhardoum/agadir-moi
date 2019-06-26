@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { View, Text, StatusBar, StyleSheet, Image } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
 import { Toolbar, Button } from 'react-native-material-ui'
-import Icon from './../util/Icon'
+import Icon from './../misc/Icon'
 import moment from 'moment'
 import 'moment/locale/fr'
 
@@ -85,11 +85,12 @@ export default class Weather extends Component
       , temp = numeric(main.temp) ? main.temp : null
       , humid = numeric(main.humidity) ? main.humidity : '?'
       , wind = (data.wind||{}).speed || null
+      , weatherSet = data.weather || []
 
     temp = null !== temp ? this.round(temp -273.15, 1) : '?'
     wind = numeric(wind) ? this.round(wind, 1) : '?'
 
-    return { temp, humid, wind, icon: ((data.weather||[]).shift() || {}).icon }
+    return { temp, humid, wind, icon: (weatherSet[0]||{}).icon }
   }
 
   getDayMetrics(index)
@@ -116,12 +117,13 @@ export default class Weather extends Component
       , wind = winds.length ? winds.reduce((a,b) => a+b) /winds.length : null
       , humid = humids.length ? humids.reduce((a,b) => a+b) /humids.length : null
       , morning = data[ Math.max(0, data.length/2 -1) ] || {}
+      , weatherSet = morning.weather||[]
 
     temp = null !== temp ? this.round(temp -273.15, 1) : '?'
     wind = null !== wind ? this.round(wind, 1) : '?'
     humid = null !== humid ? this.round(humid, 1) : '?'
 
-    return { temp, humid, wind, icon: ((morning.weather||[]).shift() || {}).icon }
+    return { temp, humid, wind, icon: (weatherSet[0]||{}).icon }
   }
 
   round(value, postdecimal=2)

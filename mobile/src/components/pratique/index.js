@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { View, Text, ScrollView, Image, StatusBar } from 'react-native'
 import { Toolbar, Button } from 'react-native-material-ui'
 import LinearGradient from 'react-native-linear-gradient'
-import Icon from './../util/Icon'
+import Icon from './../misc/Icon'
 
 const ITEMS = [
   {
