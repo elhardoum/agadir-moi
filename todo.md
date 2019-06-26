@@ -21,14 +21,17 @@
 
 ## Android
 
-- [ ] `Infinity` of features
 - [x] firebase data store and sync (advertises real time syncing for connected devices)
 - [ ] push notifications or sms for opted collectors
 - [x] data sync - preload everything on start, store data locally, compare timestamps to fetch new updates
 - [x] news index and details
-- [ ] events index and details
-- [ ] phones list and native linking
-- [ ] weather / use central server to bypass free-package limitations, update data each 3 hours, push to firebase
+- [x] events index and details
+- [x] phones list and native linking
+- [x] weather screen + use central server to bypass free-package limitations, update data each 3 hours, push to firebase
+- [ ] complaints
+- [ ] encombrants
+- [ ] localize everything to baguette
+- [ ] remove unused assets / reduce app size
 
 Optional - if time allows
 
@@ -36,4 +39,3 @@ Optional - if time allows
 - [ ] data sync is done on boot - if user reaches screens before data is initially fetched then abort XHRs and make subsequent ones
 - [x] news/events single view: queue below index and show/hide elements to preserve browsing state for better reading experience
 
-<!-- and more to come (send help) -->
