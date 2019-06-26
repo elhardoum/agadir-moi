@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { ScrollView, Text, View, Image, StyleSheet, TouchableHighlight } from 'react-native'
 import { Link } from 'react-router-native'
 import { Button } from 'react-native-material-ui'
+import Icon from './../util/Icon'
 
 export const MENU_ITEMS = [
   ['/', 'Acceuil', require('./../../images/mockup-static/apps_final-07-06.png')],
@@ -10,7 +11,7 @@ export const MENU_ITEMS = [
   ['/pratique', 'Pratique', require('./../../images/mockup-static/apps_final-07-03.png')],
   ['/map', 'Carte Interactive', require('./../../images/mockup-static/apps_final-07-05.png')],
   ['/complaints', 'Réclamation', require('./../../images/mockup-static/apps_final-07-07.png')],
-  ['/settings', 'Paramétres', require('./../../images/mockup-static/apps_final-07-06.png')],
+  ['/settings', 'Paramétres', null, 'MenuSettings'],
 ]
 
 export default class Menu extends Component
@@ -47,7 +48,16 @@ export default class Menu extends Component
               ...(i+1 == MENU_ITEMS.length && {marginBottom: 20})},
           }} icon={
             <View style={{ marginRight: 'auto', flexDirection: 'row', flexWrap: 'wrap', marginLeft: 4 }}>
-              <Image style={styles.buttonImg} source={opt[2]} />
+              {(_ =>
+              {
+                switch ( true ) {
+                  case !!opt[3]:
+                    return <Icon name={opt[3]} height="20" width="20" fill="#363635" style={styles.buttonImg} />
+
+                  case !!opt[2]:
+                    return <Image style={styles.buttonImg} source={opt[2]} />
+                }
+              })()}
               <Text style={[styles.buttonText, this.isActive(opt[0], {color: '#55d1f3'})]}>{opt[1]}</Text>
             </View>
           } onPress={e => this.props.pushState(opt[0])} key={i} />)}

@@ -2,36 +2,37 @@ import React, { Component } from 'react'
 import { View, Text, ScrollView, Image, StatusBar } from 'react-native'
 import { Toolbar, Button } from 'react-native-material-ui'
 import LinearGradient from 'react-native-linear-gradient'
+import Icon from './../util/Icon'
 
 const ITEMS = [
   {
     title: 'Actualités',
     info: 'Lorem ipsum dolor sit amet',
-    icon: require('./../../images/mockup-static/iconb-08.png'),
+    icon: 'Newspaper',
     route: '/news',
   },
   {
     title: 'Météo',
     info: 'Lorem ipsum dolor sit amet',
-    icon: require('./../../images/mockup-static/iconb-08.png'),
+    icon: 'Weather',
     route: '/weather',
   },
   {
     title: 'Numéros Utiles',
     info: 'Lorem ipsum dolor sit amet',
-    icon: require('./../../images/mockup-static/iconb-08.png'),
+    icon: 'Phone',
     route: '/phones',
   },
   {
     title: 'Encombrants',
     info: 'Lorem ipsum dolor sit amet',
-    icon: require('./../../images/mockup-static/iconb-08.png'),
+    icon: 'GarbageTruck',
     route: '/404#encombrants',
   },
   {
     title: 'Déchets',
     info: 'Lorem ipsum dolor sit amet',
-    icon: require('./../../images/mockup-static/iconb-08.png'),
+    icon: 'GarbageBin',
     route: '/404#dechets',
   },
 ]
@@ -70,9 +71,7 @@ export default class Pratique extends Component
             borderColor: '#e5e5e5', borderWidth: 2, borderRadius: 15, padding: 20, overflow: 'hidden',
             flex: 1, alignItems: 'center', justifyContent: 'center', flexDirection: 'row',
           }} onLayout={({nativeEvent: {layout: { height, width }}}) => this.setState({ [`height_${index}`]: height, [`width_${index}`]: width })}>
-            <Image source={item.icon} style={{
-              height: 40, width: 40, marginRight: 20,
-            }} />
+            <Icon name={item.icon} height="40" width="40" fill="#1578a9" style={{ marginRight: 20 }} />
 
             <View style={{ flex: 1 }}>            
               <Text style={{ color: '#1578a9', fontSize: 18, fontFamily: 'AvantGardeBookBT' }}>{item.title}</Text>

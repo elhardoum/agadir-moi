@@ -1,11 +1,14 @@
 import React, { Component } from 'react'
-import { View, Text, StatusBar, StyleSheet, Image, ToastAndroid as Toast } from 'react-native'
+import { View, Text, StatusBar, StyleSheet, Image } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
 import { Toolbar, Button } from 'react-native-material-ui'
+import Icon from './../util/Icon'
 import moment from 'moment'
 import 'moment/locale/fr'
 
 moment.locale('fr')
+
+const numeric = v => /^\d+(\.\d+)?$/.test(parseFloat(v))
 
 export default class Weather extends Component
 {
@@ -28,13 +31,112 @@ export default class Weather extends Component
       await new Promise(res => setTimeout(res, 1000))
     }
 
-    console.log( JSON.stringify(weather) )
+    this.setState({ weather }, this.updateWeatherState)
+  }
+
+  updateWeatherState()
+  {
+    const { weather=[] } = this.state
+
+    let days = {}, temps = {}
+
+    weather.map(x =>
+    {
+      let day = x.dt_txt.split(' ').shift()
+      days[day] = (days[day]||[]).concat(x)
+    })
+
+    Object.keys(days).map(k =>
+    {
+      temps[k] = []
+
+      for ( let entry in days[k] ) {
+        temps[k] = temps[k].concat([days[k][entry].main.temp, days[k][entry].main.temp_min, days[k][entry].main.temp_max])
+      }
+
+      return k
+    })
+
+    this.setState({ temps })
+  }
+
+  tempsMinMax(date)
+  {
+    let { temps={} } = this.state
+      , list = temps[date] || []
+      , min = list.length ? Math.round(Math.min(...list) -273.15) : null
+      , max = list.length ? Math.round(Math.max(...list) -273.15) : null
+
+    if ( null === min && null === max ) {
+      return '?/?'
+    } else if ( min === max ) {
+      return `${min}º`
+    } else {
+      return `${max}º/${min}º`
+    }
+  }
+
+  todaysMetrics()
+  {
+    let { weather=[] } = this.state
+      , date = moment(+new Date).format('YYYY-MM-DD')
+      , data = weather.filter(x => x.dt_txt.startsWith(date))[0] || {}
+      , main = data.main || {}
+      , temp = numeric(main.temp) ? main.temp : null
+      , humid = numeric(main.humidity) ? main.humidity : '?'
+      , wind = (data.wind||{}).speed || null
+
+    temp = null !== temp ? this.round(temp -273.15, 1) : '?'
+    wind = numeric(wind) ? this.round(wind, 1) : '?'
+
+    return { temp, humid, wind, icon: ((data.weather||[]).shift() || {}).icon }
+  }
+
+  getDayMetrics(index)
+  {
+    if ( index === 0 )
+      return this.todaysMetrics()
+
+    let { weather=[] } = this.state
+      , date = moment(+new Date).add(index,'days').format('YYYY-MM-DD')
+      , data = weather.filter(x => x.dt_txt.startsWith(date)) || []
+
+    let temps = [], humids = [], winds = []
+    
+    data.map(data =>
+    {
+      temps.push(data.main.temp)
+      humids.push(data.main.humidity)
+      winds.push(data.wind.speed)
+    })
+
+    [temps, humids, winds] = [temps, humids, winds].map(set => set.filter(numeric))
+
+    let temp = temps.length ? temps.reduce((a,b) => a+b) /temps.length : null
+      , wind = winds.length ? winds.reduce((a,b) => a+b) /winds.length : null
+      , humid = humids.length ? humids.reduce((a,b) => a+b) /humids.length : null
+      , morning = data[ Math.max(0, data.length/2 -1) ] || {}
+
+    temp = null !== temp ? this.round(temp -273.15, 1) : '?'
+    wind = null !== wind ? this.round(wind, 1) : '?'
+    humid = null !== humid ? this.round(humid, 1) : '?'
+
+    return { temp, humid, wind, icon: ((morning.weather||[]).shift() || {}).icon }
+  }
+
+  round(value, postdecimal=2)
+  {
+    return parseFloat(parseFloat(value).toFixed(postdecimal))
   }
 
   render()
   {
     const { statusBarHeight=24 } = this.props.state
+        , { dayIndex=0 } = this.state
+        , dayDisplay = dayIndex ? moment(+new Date).add(dayIndex,'days').format('dddd') : 'Aujourd\'hui'
 
+    const { temp, humid, wind, icon: weatherIcon } = this.getDayMetrics(dayIndex)
+    
     return (
       <View style={{ flex: 1, backgroundColor: '#fff' }}>
         <LinearGradient start={{x: 1, y: 0}} end={{x: 0, y: 1}} colors={['#11096c', '#1a5293', '#2297b7']} style={{
@@ -53,40 +155,36 @@ export default class Weather extends Component
             />
           </View>
 
-          <View style={{
-            flex: 1, flexDirection: 'column', justifyContent: 'space-between',
-          }}>
+          <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'space-between' }}>
             <View style={styles.headerCityWrap}>
               <Text style={styles.headerCity}>AGADIR</Text>
-              <Text style={styles.headerCitySub}>Aujourd'hui</Text>
+              <Text style={[styles.headerCitySub, {textTransform:'capitalize'}]}>{dayDisplay}</Text>
             </View>
 
             <View>
-              <Image source={require('./../../images/mockup-static/iconb-01.png')} style={styles.headerIcon} />
-              <Text style={styles.headerIconDay}>{moment(+new Date).format('dddd')}</Text>
+              <Icon name={weatherIcon ? `wi${weatherIcon}` : 'wi01d'} height="150" width="150" fill="#fff" style={styles.headerIcon} />
             </View>
 
             <View style={styles.metaWrap}>
-
               <View style={styles.metaMetric}>
-                <Image source={require('./../../images/mockup-static/iconb-05.png')} style={styles.metaIcon} />
-                <Text style={styles.metaNumber}>19</Text>
+                <Icon name='Temperature' height="15" width="15" fill="#fff" style={styles.metaIcon} />
+                <Text style={styles.metaNumber}>{temp||'?'}</Text>
                 <Text style={styles.metaUnit}>°c</Text>
               </View>
 
               <View style={styles.metaDivider}></View>
 
               <View style={styles.metaMetric}>
-                <Image source={require('./../../images/mockup-static/iconb-06.png')} style={styles.metaIcon} />
-                <Text style={styles.metaNumber}>80</Text>
+                <Icon name='Humidity' height="15" width="15" fill="#fff" style={styles.metaIcon} />
+                <Text style={styles.metaNumber}>{humid||'?'}</Text>
                 <Text style={styles.metaUnit}>%</Text>
               </View>
 
               <View style={styles.metaDivider}></View>
 
               <View style={styles.metaMetric}>
-                <Image source={require('./../../images/mockup-static/iconb-02.png')} style={styles.metaIcon} />
-                <Text style={styles.metaNumber}>41</Text>
+                <Icon name='Wind' height="15" width="15" fill="#fff" style={styles.metaIcon} />
+                <Text style={styles.metaNumber}>{wind||'?'}</Text>
                 <Text style={[styles.metaUnit, {fontSize:14}]}>M/S</Text>
               </View>
             </View>
@@ -94,17 +192,17 @@ export default class Weather extends Component
         </LinearGradient>
 
         <View style={styles.daysSlider} onLayout={({nativeEvent: {layout: { height }}}) => this.setState({ daysSliderHeight: height })}>
-          {this.state.days.map((time,i) => <View key={i} style={[styles.daysSliderItem, !i && {backgroundColor: '#197cce'}]}>
+          {this.state.days.map((time,i) => <View key={i} style={[styles.daysSliderItem, dayIndex==i && {backgroundColor: '#197cce'}]}>
 
-            <Text style={[styles.sliderDayText, !i && {color: '#d3dae0'}, {fontSize:17}]}>{moment(time).format('ddd').replace(/.$/, '')}</Text>
+            <Text style={[styles.sliderDayText, dayIndex==i && {color: '#d3dae0'}, {fontSize:17}]}>{moment(time).format('ddd').replace(/.$/, '')}</Text>
             <Image source={require('./../../images/mockup-static/apps_final-07-06.png')} style={styles.daysSliderIcon} />
-            <Text style={[styles.sliderDayText, !i && {color: '#d3dae0'}]}>19º/13º</Text>
+            <Text style={[styles.sliderDayText, dayIndex==i && {color: '#d3dae0'}]}>{this.tempsMinMax(moment(time).format('YYYY-MM-DD'))}</Text>
 
             <Button accent text={''} upperCase={false}
               style={{container: {
                 position: 'absolute', top: 0, left: 0, backgroundColor: 'transparent',
                 height: this.state.daysSliderHeight || '100%', width: '100%',
-              }}} onPress={e => Toast.show('no', Toast.SHORT)} />
+              }}} onPress={e => this.setState({ dayIndex: i })} />
 
           </View>)}
         </View>
@@ -162,10 +260,11 @@ const styles = StyleSheet.create({
     textTransform: 'capitalize',
   },
   metaWrap: {
-    flex: 1,
+    // flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingBottom: 35,
   },
   metaMetric: {
     flexDirection: 'row',
@@ -179,7 +278,7 @@ const styles = StyleSheet.create({
   metaNumber: {
     fontWeight: '600',
     color: '#fff',
-    fontSize: 22,
+    fontSize: 21,
   },
   metaUnit: {
     color: '#fff',
