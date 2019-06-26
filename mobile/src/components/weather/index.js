@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Text, StatusBar, StyleSheet, Image } from 'react-native'
+import { View, Text, StatusBar, StyleSheet } from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
 import { Toolbar, Button } from 'react-native-material-ui'
 import Icon from './../misc/Icon'
@@ -195,9 +195,8 @@ export default class Weather extends Component
 
         <View style={styles.daysSlider} onLayout={({nativeEvent: {layout: { height }}}) => this.setState({ daysSliderHeight: height })}>
           {this.state.days.map((time,i) => <View key={i} style={[styles.daysSliderItem, dayIndex==i && {backgroundColor: '#197cce'}]}>
-
             <Text style={[styles.sliderDayText, dayIndex==i && {color: '#d3dae0'}, {fontSize:17}]}>{moment(time).format('ddd').replace(/.$/, '')}</Text>
-            <Image source={require('./../../images/mockup-static/apps_final-07-06.png')} style={styles.daysSliderIcon} />
+            <Icon name={`wi${this.getDayMetrics(i).icon || '01d'}`} height="28" width="28" fill={dayIndex==i ? '#d3dae0' : '#197cce'} style={styles.daysSliderIcon} />
             <Text style={[styles.sliderDayText, dayIndex==i && {color: '#d3dae0'}]}>{this.tempsMinMax(moment(time).format('YYYY-MM-DD'))}</Text>
 
             <Button accent text={''} upperCase={false}
@@ -205,7 +204,6 @@ export default class Weather extends Component
                 position: 'absolute', top: 0, left: 0, backgroundColor: 'transparent',
                 height: this.state.daysSliderHeight || '100%', width: '100%',
               }}} onPress={e => this.setState({ dayIndex: i })} />
-
           </View>)}
         </View>
       </View>
