@@ -172,9 +172,7 @@ export default class Weather extends Component
             />
           </View>
 
-          <GestureRecognizer style={{flex:1}}
-            onSwipeRight={e => this.setState({ dayIndex: Math.max(0, dayIndex-1) }, _ => dayIndex > 0 && this.animate())}
-            onSwipeLeft={e => this.setState({ dayIndex: Math.min(4, dayIndex+1) }, _ => dayIndex < 4 && this.animate())}>
+          <View style={{flex:1}}>
             <AnimatableView ref={r => this.REF_ANIMATABLE_VIEW = r} style={{ flex: 1, flexDirection: 'column', justifyContent: 'space-between' }}>
               <View style={styles.headerCityWrap}>
                 <Text style={styles.headerCity}>AGADIR</Text>
@@ -209,7 +207,12 @@ export default class Weather extends Component
                 </View>
               </View>
             </AnimatableView>
-          </GestureRecognizer>
+
+            <GestureRecognizer style={{ position: 'absolute', top: 0, left: 0, backgroundColor: 'transparent', height: '100%', width: '100%' }}
+              onSwipeRight={e => this.setState({ dayIndex: Math.max(0, dayIndex-1) }, _ => dayIndex > 0 && this.animate())}
+              onSwipeLeft={e => this.setState({ dayIndex: Math.min(4, dayIndex+1) }, _ => dayIndex < 4 && this.animate())}>
+            </GestureRecognizer>
+          </View>
         </LinearGradient>
 
         <View style={styles.daysSlider} onLayout={({nativeEvent: {layout: { height }}}) => this.setState({ daysSliderHeight: height })}>
