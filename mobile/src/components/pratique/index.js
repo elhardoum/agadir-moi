@@ -6,32 +6,26 @@ import Icon from './../misc/Icon'
 
 const ITEMS = [
   {
-    title: 'Actualités',
-    info: 'Lorem ipsum dolor sit amet',
-    icon: 'Newspaper',
-    route: '/news',
-  },
-  {
     title: 'Météo',
-    info: 'Lorem ipsum dolor sit amet',
+    info: 'Mise à jour météo locale chaque jour',
     icon: 'Weather',
     route: '/weather',
   },
   {
     title: 'Numéros Utiles',
-    info: 'Lorem ipsum dolor sit amet',
+    info: 'Des numéros d’urgence permettent de joindre facilement',
     icon: 'Phone',
     route: '/phones',
   },
   {
     title: 'Encombrants',
-    info: 'Lorem ipsum dolor sit amet',
+    info: 'Pour faire disparaitre vous anciens meuble et encombrant',
     icon: 'GarbageTruck',
     route: '/404#encombrants',
   },
   {
     title: 'Déchets',
-    info: 'Lorem ipsum dolor sit amet',
+    info: 'Pour rendre votre espace propre',
     icon: 'GarbageBin',
     route: '/404#dechets',
   },
