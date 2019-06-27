@@ -5,7 +5,7 @@
 git clone https://github.com/elhardoum/agadir-moi && cd agadir-moi
 
 # setup environment variables
-mv .env.sample && $EDITOR .env
+cp .env.sample .env && $EDITOR $_
 
 # regenerate JWT signing keys
 cd admin/src/pem && rm *
@@ -49,7 +49,7 @@ docker-compose down; docker-compose up -d
 cd mobile
 
 # setup env
-mv env.sample.json env.json && $EDITOR $_
+cp env.sample.json env.json && $EDITOR $_
 
 # install dependencies
 npm install
@@ -98,8 +98,8 @@ react-native run-android
 - [x] weather screen + use central server to bypass free-package limitations, update data each 3 hours, push to firebase
 - [ ] complaints
 - [ ] encombrants
-- [ ] localize everything to baguette
-- [ ] remove unused assets / reduce app size
+- [x] localize everything to baguette
+- [x] remove unused assets
 
 Optional - if time allows
 

@@ -35,12 +35,7 @@ export default class LoadingScreen extends Component
     }
 
     return (
-      <GestureRecognizer style={ styles.container }
-        onSwipeRight={e => this.setState({ index: Math.max(0, index-1) }, _ => index > 0 && this.animate())}
-        onSwipeLeft={e => this.setState({ index: Math.min(2, index+1) }, _ => {
-          index < 2 && this.animate()
-          index >= 2 && finishSlider()
-        })}>
+      <View style={ styles.container }>
         <AnimatableView ref={ref => this.REFs.view = ref} style={ styles.container }>
           <Image style={ styles.headerImage } source={IMAGES[index]} />
 
@@ -48,13 +43,23 @@ export default class LoadingScreen extends Component
             {['Encombrant', 'Déchet', 'Signaler sur l’espace publique'][index]}
           </Text>
 
-          <Text style={ [styles.description, styles.paddingSides] }>
-            {[
-              'Pour faire disparaitre vous anciens meuble et encombrant.',
-              'Pour rendre votre espace propre.',
-              'Pour avoir une ville magnifique.',
-            ][index]}
-          </Text>
+          {(style =>
+          {
+            return [
+              <React.Fragment>
+                <Text style={style}>Pour faire disparaitre vous anciens</Text>
+                <Text style={style.concat({marginTop: 0})}>meuble et encombrant.</Text>
+              </React.Fragment>,
+              <Text style={style}>Pour rendre votre espace propre.</Text>,
+              <Text style={style}>Pour avoir une ville magnifique.</Text>,
+            ][index]
+          })([styles.description, styles.paddingSides])}
+
+          <GestureRecognizer onSwipeRight={e => this.setState({ index: Math.max(0, index-1) }, _ => index > 0 && this.animate())}
+            onSwipeLeft={e => this.setState({ index: Math.min(2, index+1) }, _ => {
+              index < 2 && this.animate()
+              index >= 2 && finishSlider()
+            })} style={{ backgroundColor: 'transparent', position: 'absolute', bottom: 10, left: 0, height: '100%', width: '100%' }} />
         </AnimatableView>
 
         <View style={styles.dotWrapper} onLayout={e => this.setState({ dotsLayout: e.nativeEvent.layout })}>
@@ -81,7 +86,7 @@ export default class LoadingScreen extends Component
           <Button accent style={{text: styles.skipButton}} text={ index === 2 ? i18n('Finish') : i18n('Skip') }
             onPress={finishSlider} />
         </View>}
-      </GestureRecognizer>
+      </View>
     )
   }
 }
@@ -92,17 +97,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
+    width: '100%',
   },
   headerImage: {
-    marginBottom: 0
+    marginBottom: 0,
+    height: 200, width: 200,
   },
   title: {
     alignSelf: 'center',
     color: '#fff',
     fontSize: 20,
-    marginTop: 10,
+    marginTop: -20,
     color: '#555',
-    marginBottom: 10,
+    // marginBottom: 10,
     fontFamily: 'AvantGardeBookBT',
   },
   description: {
